@@ -30,11 +30,17 @@ void draw()
     
     vector< Pos* > V1;
 
+    for(float i = 0.0; i < (jj_flag ? min(jj, 1.0f) : 0.0); i += 0.001)
+    {
+	V1.push_back( new PosXYZ( i, sqrt( pow(i, 2)*3 ), 1.0f ) );
+    }
+    
+    /*
     for(float i = 0.0, j = 1.0, theta = 0.0; theta < (jj_flag ? min(jj,PI/2) : 0.0); theta += 0.001, i += 0.0001)
     {
-	j = (theta / (PI/2) )*sinh( theta );/* + cos( theta );*/
+	j = (theta / (PI/2) )
 	V1.push_back( new PosXYZ( i, j, 1.0f) );
-    }/*
+    }
     V1.push_back( &P1 );
     V1.push_back( &P2 );
     V1.push_back( &P3 );

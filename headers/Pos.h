@@ -2,6 +2,15 @@
 #define __POS_H__
 
 #include "Color.h"
+#include <math.h>
+
+#define RT_SUM_OF_SQRS(a, b, c) sqrt( pow(a, 2), pow(b, 2), pow(c, 2) )
+
+template<class ty>
+ty root_sum_of_squares( ty t1, ty t2, ty t3 )
+{
+    sqrt( pow(t1, 2) + pow(t2, 2) + pow(t3, 2) );
+}
 
 typedef float PosX;
 typedef float PosY;
@@ -21,6 +30,8 @@ class Pos
 		// Pos() : C() {}
 };
 
+class PosRP;
+
 class PosXY : public Pos
 {
 	public:
@@ -30,9 +41,30 @@ class PosXY : public Pos
 	public:
 		PosXY(float f1, float f2): Pos(), X(f1), Y(f2) {}
 		PosXY(): Pos(), X(0), Y(0) {}
+		PosXY(const PosRP& P1);
 		
 		void getVertex();
 }; 
+
+class PosRP : public Pos
+// Polar Co-ordinates w/ r (distance from origin), phi (angle of x->y)
+{
+public:
+    float radius;
+    float angle;
+    
+    PosRP(float f1, float f2): Pos(), radius(f1), angle(f2) {}
+    PosRP(): Pos(), radius(0), radius(0) {}
+    PosRP(const PosXY& P1);
+    
+    float operator-( const PosXY& P1 )
+    // PosXYZ - PosXYZ computes the distance between the two points
+    {
+	return root_sum_of_squares<float>(P1.X - X, P1.Y - Y, 0);
+    }
+    
+    void getVertex();
+};
 
 class PosXYZ : public Pos
 {
@@ -64,6 +96,14 @@ class PosXYZ : public Pos
 		{
 			return PosXYZ( X + f1, Y + f1, Z + f1 ); 
 		}
+		
+		float operator-( const PosXYZ& P1 )
+		// PosXYZ - PosXYZ computes the distance between the two points
+		{
+		    return root_sum_of_squares<float>(P1.X - X, P1.Y - Y, P1.Z - Z);
+		}
+		
+		PosXY toXY() { return PosXY( X, Y ); }
 		
 		void getVertex();
 };
