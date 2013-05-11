@@ -1,0 +1,63 @@
+Color.cpp
+---------
+#include "Color.h"
+#include "GL_GLUT.h"
+
+void ColorRGBA::get()
+{
+	glColor4f( R, G, B, A );
+}
+
+Pos.cpp
+-------
+#include "Pos.h"
+#include "Color.h"
+#include "GL/GLUT.h"
+
+
+void PosXY::getVertex()
+{
+	glVertex2f( X, Y );
+}
+
+void PosXYZ::getVertex()
+{
+	glVertex3f( X, Y, Z );
+}
+
+Draw.cpp
+--------
+#include "Draw.h"
+#include "GL/Glut.h"
+
+void Draw::Points( std::vector< Pos >& V1 )
+{
+	glBegin( GL_POINTS );
+	for(std::vector< Pos >::iterator it = V1.begin(); it != V1.end(); ++it)
+	{
+		V1->getColor();
+		V1->getVertex();
+	}
+	glEnd();
+}
+
+void Draw::Line( Pos p1, Pos p2 )
+{
+	glBegin( GL_LINES );
+			p1->getColor();
+		p1->getVertex();
+			p2->getColor();
+		p2->getVertex();
+	glEnd();
+}
+
+void Draw::Lines( std::vector< Pos >& V1 )
+{
+	glBegin( GL_LINES );
+	for(std::vector< Pos >::iterator it = V1.begin(); it != V1.end(); ++it)
+	{
+		V1->getColor();
+		V1->getVertex();
+	}
+	glEnd();
+}

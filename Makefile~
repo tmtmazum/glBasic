@@ -1,0 +1,7 @@
+OBJECTS = run.cpp src/*.cpp
+
+run: $(OBJECTS)
+	g++ $(OBJECTS) src/Draw.cpp -lglut -o $@
+	
+clean:
+	rm -rf ./run

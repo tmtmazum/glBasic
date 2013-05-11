@@ -1,0 +1,111 @@
+Color.h
+-------
+#ifndef __COLOR_H__
+
+class Color
+{
+	virtual void get() = 0;
+};
+
+class ColorRGBA : public Color
+{
+	float R,G,B,A;
+	
+	public: 
+		ColorRGBA(float f1, float f2, float f3, float f4) : R(f1), G(f2), B(f3), A(f4) {}
+		ColorRGBA(ColorRGBA& C1) : R(C1.R), G(C1.G), B(C1.B), A(C1.A) {}
+		ColorRGBA(): R(255.0), G(255.0), B(255.0), A(255.0) {}
+		void get();
+};
+
+#endif
+
+
+Pos.h
+-----
+#ifndef __POS_H__
+#include "Color.h"
+
+typedef float PosX;
+typedef float PosY;
+typedef float PosZ;
+
+class Pos
+{
+	Color C;
+	public:
+		virtual void getVertex() = 0;	// Calls OpenGL function for plotting a vertex
+										// Example: glVertex2f( X, Y );
+		void getColor() { C.get(); }
+		void setColor( Color& C1 ) : C(C1) {}
+};
+
+class PosXY : public Pos
+{
+	private:
+		PosX X;
+		PosY Y;
+	
+	public:
+		PosXY(float f1, float f2): X(f1), Y(f2), C() {}
+		PosXY(): X(0), Y(0), C() {}
+		
+		void getVertex();
+}; 
+
+class PosXYZ : public Pos
+{
+	private:
+		PosX X;
+		PosY Y;
+		PosZ Z;
+		Color C;
+		
+	public:
+		PosXY(float f1, float f2, float f3): X(f1), Y(f2), Z(f3), C() {}
+		PosXY(): X(0), Y(0), Z(0), C() {}
+		
+		void getVertex();
+};
+
+#endif
+
+Draw.h
+------
+#ifndef __DRAW_H__
+#include "Pos.h"
+#include <vector>
+
+namespace Draw
+{
+	void Points( std::vector< Pos >& );
+
+	void Line( Pos, Pos );
+	void Lines( std::vector< PosXY >& );
+	void LineStrip( std::vector< PosXY >& );
+	
+	
+};
+
+#endif
+
+class PosManager
+{
+	PosManager();
+	
+	private:
+		std::vector< Pos > p_output;
+};
+
+Prims.h
+-------
+#ifndef __PRIMS_H__
+
+struct prim {};
+
+struct Cube : public prim
+{
+	float length;
+};
+
+#endif
