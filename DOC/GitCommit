@@ -1,5 +1,15 @@
+if [ $# -ne 1 ]
+then
+	echo "ERROR: Must enter version number as argument"
+	exit 1
+else
+
 cd ..
 git init
 git add *
 git commit -m "commit[${1}]"
 git push origin master
+
+echo "Success!"
+
+fi
