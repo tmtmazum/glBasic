@@ -2,14 +2,21 @@
 #define __POS_H__
 
 #include "Color.h"
+#include "angle.h"
 #include <math.h>
 
 #define RT_SUM_OF_SQRS(a, b, c) sqrt( pow(a, 2), pow(b, 2), pow(c, 2) )
 
-template<class ty>
-ty root_sum_of_squares( ty t1, ty t2, ty t3 )
+const float PI = 4.0 * atan( 1.0 );
+
+class Pos;
+class PosXY;
+class PosRP;
+class PosXYZ;
+
+float root_sum_of_squares( float t1, float t2, float t3=0 )
 {
-    sqrt( pow(t1, 2) + pow(t2, 2) + pow(t3, 2) );
+    return sqrt( pow(t1, 2) + pow(t2, 2) + pow(t3, 2) );
 }
 
 typedef float PosX;
@@ -30,7 +37,7 @@ class Pos
 		// Pos() : C() {}
 };
 
-class PosRP;
+
 
 class PosXY : public Pos
 {
@@ -42,7 +49,15 @@ class PosXY : public Pos
 		PosXY(float f1, float f2): Pos(), X(f1), Y(f2) {}
 		PosXY(): Pos(), X(0), Y(0) {}
 		PosXY(const PosRP& P1);
+		PosXY(const PosXY& P1) : X( P1.X ), Y(P1.Y) {}
 		
+		float operator-( const PosXY& P1 )
+		// PosXYZ - PosXYZ computes the distance 
+		// between the two points
+		{
+		    return root_sum_of_squares(P1.X - X, P1.Y - Y, 0);
+		}
+	    
 		void getVertex();
 }; 
 
@@ -51,17 +66,14 @@ class PosRP : public Pos
 {
 public:
     float radius;
-    float angle;
+    angleRAD angle;
     
     PosRP(float f1, float f2): Pos(), radius(f1), angle(f2) {}
-    PosRP(): Pos(), radius(0), radius(0) {}
+    PosRP(): Pos(), radius(0), angle(0) {}
+    PosRP(const PosRP& P1) : radius( P1.radius ), angle( P1.getAngle() ) {}
     PosRP(const PosXY& P1);
     
-    float operator-( const PosXY& P1 )
-		// PosXYZ - PosXYZ computes the distance between the two points
-    {
-	return root_sum_of_squares<float>(P1.X - X, P1.Y - Y, 0);
-    }
+    float getAngle() const { return angle.value; }
     
     void getVertex();
 };
@@ -83,6 +95,9 @@ class PosXYZ : public Pos
 		PosXYZ( const PosXYZ& P1 ):
 			    Pos(), X(P1.X), Y(P1.Y), Z(P1.Z) {}
 		
+		PosXYZ( const PosXY& P1 ):
+			    Pos(), X(P1.X), Y(P1.Y), Z(1.0f) {}
+		
 		PosXYZ operator+( const PosXYZ& P1 )
 		// The + Operator represents all translations
 		// (1,1,1) + (2,2,2) = (3,3,3)
@@ -100,7 +115,7 @@ class PosXYZ : public Pos
 		float operator-( const PosXYZ& P1 )
 		// PosXYZ - PosXYZ computes the distance between the two points
 		{
-		    return root_sum_of_squares<float>(P1.X - X, P1.Y - Y, P1.Z - Z);
+		    return root_sum_of_squares(P1.X - X, P1.Y - Y, P1.Z - Z);
 		}
 		
 		PosXY toXY() { return PosXY( X, Y ); }

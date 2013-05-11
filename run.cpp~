@@ -1,20 +1,22 @@
 #include <iostream>
-#include <GL/glut.h>
-#include <GL/glu.h>
-#include "headers/Color.h"
-#include "headers/Pos.h"
-#include "headers/Draw.h"
 #include <vector>
 #include <cassert>
 #include <cmath>
 #include <algorithm>
+
+#include <GL/glut.h>
+#include <GL/glu.h>
+
+#include "headers/Color.h"
+#include "headers/Pos.h"
+#include "headers/Draw.h"
+#include "headers/transform.h"
 
 using namespace std;
 
 PosXYZ Cam(0.0f, 0.0f, 0.0f);
 float CamTranslateSpeed = -0.05f;
 int ModelView_MatrixStack = 0;
-const float PI = 4.0 * atan( 1.0 );
 bool jj_flag = false;
 float jj = 0.0;
 void draw()
@@ -26,15 +28,24 @@ void draw()
     
     float len = 1.0f;
     
-    cout << "pi is " << PI << endl;
+    // cout << "pi is " << PI << endl;
+    
+    vector< Pos* > Axis;
+    Axis.push_back( new PosXY( 1.0, 0.0 ));
+    Axis.push_back( new PosXY( -1.0, 0.0 ));
+    Axis.push_back( new PosXY( 0.0, 1.0 ));
+    Axis.push_back( new PosXY( 0.0, -1.0 ));
     
     vector< Pos* > V1;
 
-    for(float i = 0.0; i < (jj_flag ? min(jj, 1.0f) : 0.0); i += 0.001)
-    {
-	V1.push_back( new PosXYZ( i, sqrt( pow(i, 2)*3 ), 1.0f ) );
-    }
-    
+    PosXY P1( PosRP( 0.3f, 3*(PI/4) ) );
+    PosXY Pivot( -0.1 , 0.0 );
+    PosXY P2( transform::rotateXY( P1, Pivot, jj ) );
+    // PosXY P2( transform::rotateXYaboutOrigin( P1, PI/2 ) );
+    if(i == 0) std::cout << "P1 is " << P1.X << ", " << P1.Y << endl;
+    if(i == 0) std::cout << "Pexp is " << P1.X << ", " << P1.Y - PI << endl;
+    if(i == 0) std::cout << "P2 is " << P2.X << ", " << P2.Y << endl;
+    jj_flag ? V1.push_back( &P2 ) : V1.push_back( &P1 );//
     /*
     for(float i = 0.0, j = 1.0, theta = 0.0; theta < (jj_flag ? min(jj,PI/2) : 0.0); theta += 0.001, i += 0.0001)
     {
@@ -52,7 +63,8 @@ void draw()
     */
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glTranslatef( Cam.X, Cam.Y, Cam.Z );
-	Draw::Generic( GL_POINTS, V1 );  
+	Draw::Generic( GL_LINES, Axis );
+	Draw::Generic( GL_POINTS, V1 );
     glutSwapBuffers();
     /*
 	glBegin(GL_LINES);
@@ -60,7 +72,7 @@ void draw()
 		glVertex3f(0.1, 0.01f, 0.0f);
 	glEnd();*/
     
-    Cam.X = 0; Cam.Y = 0; Cam.Z = 0;
+    Cam.X = 0; Cam.Y = 0; Cam.Z = 0; i++;
 }
 
 void handleKeyPress(unsigned char key, int x, int y)

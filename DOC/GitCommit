@@ -8,6 +8,7 @@ cd ..
 git init
 git add *
 git commit -m "commit[${1}]"
+git remote add origin git@github.com:tmtmazum/glBasic.git
 git push origin master
 
 echo "Success!"
