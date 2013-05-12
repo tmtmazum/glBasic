@@ -12,7 +12,7 @@ namespace transform
     
     PosXY rotateXY( PosXY& target, const PosXY& pivot, 
 	       const angleRAD& angle_of_rotation, 
-	       bool clockwise = true);
+	       const bool clockwise = true);
     
     PosXY rotateXYaboutOrigin( PosXY& target, 
 			      const angleRAD& angle_of_rotation, 

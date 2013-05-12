@@ -10,9 +10,9 @@
 namespace transform
 {
     
-    PosXY rotateXY( PosXY& target, const PosXY& pivot, 
+    void rotateXY( PosXY& target, const PosXY& pivot, 
 	       const angleRAD& angle_of_rotation, 
-	       bool clockwise = true);
+	       const bool clockwise = true);
     
     PosXY rotateXYaboutOrigin( PosXY& target, 
 			      const angleRAD& angle_of_rotation, 
@@ -26,7 +26,7 @@ namespace transform
 	       const angleRAD& angle_of_rotation, bool clockwise = true);
     
     PosXY translateXY( PosXY& target, const PosXY& translation );
-    PosXY getRelativeXY( PosXY , const PosXY& );
+    PosXY getRelativeXY( PosXY , PosXY );
 };
 
 #endif

@@ -1,12 +1,12 @@
 #include "../headers/transform.h"
 #include "../headers/DEBUG.h"
 
-PosXY transform::rotateXY( PosXY& target, const PosXY& pivot, 
+PosXTY transform::rotateXY( PosXY& target, const PosXY& pivot, 
 	    const angleRAD& angle_of_rotation, 
-	    bool clockwise)
+	    const bool clockwise)
 {
     PosXY Pn( transform::getRelativeXY( target, pivot ) );
-    PosXY Origin(0,0);
+    PosXY Origin(-pivot.X, -pivot.Y);
     PosXY Px( transform::getRelativeXY( 
 	transform::rotateXYaboutOrigin( Pn, 
 					angle_of_rotation, 

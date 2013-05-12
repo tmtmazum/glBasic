@@ -3,7 +3,7 @@
 
 PosXY transform::rotateXY( PosXY& target, const PosXY& pivot, 
 	    const angleRAD& angle_of_rotation, 
-	    bool clockwise)
+	    const bool clockwise)
 {
     PosXY Pn( transform::getRelativeXY( target, pivot ) );
     PosXY Origin(-pivot.X, -pivot.Y);

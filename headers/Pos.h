@@ -7,12 +7,14 @@
 
 #define RT_SUM_OF_SQRS(a, b, c) sqrt( pow(a, 2), pow(b, 2), pow(c, 2) )
 
+class PosRPT;
 const float PI = 4.0 * atan( 1.0 );
 
 class Pos;
 class PosXY;
 class PosRP;
 class PosXYZ;
+class PosRPT;
 
 float root_sum_of_squares( float t1, float t2, float t3=0 );
 
@@ -86,11 +88,9 @@ class PosXYZ : public Pos
 		PosXYZ(float f1=0, float f2=0, float f3=0): 
 			    Pos(), X(f1), Y(f2), Z(f3) {}
 			    
-		PosXYZ(): 
-			    Pos(), X(0), Y(0), Z(0) {}
-		
 		PosXYZ( const PosXYZ& P1 ):
 			    Pos(), X(P1.X), Y(P1.Y), Z(P1.Z) {}
+		PosXYZ( const PosRPT& P1 );	// DEFINED
 		
 		PosXYZ( const PosXY& P1 ):
 			    Pos(), X(P1.X), Y(P1.Y), Z(1.0f) {}
@@ -118,6 +118,29 @@ class PosXYZ : public Pos
 		PosXY toXY() { return PosXY( X, Y ); }
 		
 		void getVertex();
+};
+
+class PosRPT : public Pos
+// Spherical Co-ordinate class
+{
+public:
+    float radius;
+    float phi;		/* Angle from x -> y */
+    float theta;	/* Angle from z -> xy */
+
+    PosRPT(float f1, float f2, float f3): 
+	Pos(), radius(f1), phi(f2), theta(f3) {}
+    PosRPT(): 
+	Pos(), radius(0), phi(0), theta(0) {}
+    PosRPT(const PosRPT& P1) : 
+	radius( P1.radius ), phi( P1.getPhi() ), theta( P1.getTheta() ) {}
+    
+    PosRPT(const PosXYZ& P1);	// DEFINED
+    
+    float getPhi() const { return phi; }
+    float getTheta() const { return theta; }
+    
+    void getVertex();	// DEFINE THIS
 };
 
 #endif

@@ -1,0 +1,55 @@
+#ifndef __POS_MANAGER_H__
+#define __POS_MANAGER_H__
+
+#include <vector>
+#include "Pos.h"
+#include "GEOMETRY.h"
+
+class PosManager
+{
+    enum drawing_convention { centre_of_mass, positive_axes };
+
+private:    
+    PosXYZ placement;
+    std::vector< Pos* > m_output;
+    drawing_convention draw_mode;
+    int draw_type;
+    bool drawReady;
+    
+public:    
+    PosManager(): draw_mode(centre_of_mass), drawReady(false), draw_type(-1) {}
+    template<typename GEOCLASS>
+    PosManager( GEOCLASS GO1 , const PosXYZ& placement ): 
+	draw_mode(centre_of_mass), drawReady(false), draw_type(-1) 
+	{
+	    make(GO1, placement);
+	}
+	
+    void setDrawMode(drawing_convention dm) { draw_mode = dm; } /* writes draw_mode */
+    
+    template <typename GEOCLASS>
+    void make( GEOCLASS GO1 , const PosXYZ& placement )
+    {
+	clear();
+	this->placement = placement;
+	genOutput( GO1 );
+	
+	drawReady = true;
+    }
+    
+    void makeAxisXY( ColorRGBA C );
+    
+    std::vector< Pos* >& getOutput() { return m_output; }
+    int getType() const { return draw_type; }
+    bool isDrawReady() const { return drawReady; }
+    
+    ~PosManager();
+
+private:
+    void genOutput( GO_SQUARE& );
+    void genOutput( GO_CUBE& );
+    void clear();
+};
+
+
+#endif

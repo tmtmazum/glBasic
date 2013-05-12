@@ -2,7 +2,10 @@
 #define __DRAW_H__
 
 #include "Pos.h"
+#include "Color.h"
 #include <vector>
+
+class PosManager;
 
 namespace Draw
 {/*
@@ -14,6 +17,11 @@ namespace Draw
 	
 	// template< typename ty >
 	void Generic( int , std::vector< Pos* >& );
+	void Generic( PosManager& );
+	// void Generic( PosManager );
+	
+	void CubeLP( float length, PosXYZ position, ColorRGBA C1 = 1.0);
+
 };
 
 #endif

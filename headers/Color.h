@@ -22,13 +22,18 @@ class ColorRGBA : public Color
 			R(f1), G(f2), B(f3), A(1.0) 
 	{}
 		
-	ColorRGBA(ColorRGBA& C1) : Color(),
+	ColorRGBA(const ColorRGBA& C1) : Color(),
 			R(C1.R), G(C1.G), B(C1.B), A(C1.A) 
 	{}
 	
 	ColorRGBA(): Color(),
 			R(255.0), G(255.0), B(255.0), A(255.0) 
 	{}
+	
+	ColorRGBA(float f): Color(),
+			R(f), G(f), B(f), A(f) 
+	{}
+	
 
     /* Overloaded Operators */
 	void operator=(const Color& C1) { (*this) = (ColorRGBA&) C1; }
