@@ -156,7 +156,7 @@ void handleMotion(int x, int y)
 	
 	float zoomX = x - MousePos.X;
 	float zoomY = y - MousePos.Y;
-	// rotateCam.X -= 128*zoomY / WindowHeight;
+	rotateCam.X -= 128*zoomY / WindowHeight;
 	rotateCam.Y += 128*zoomX / WindowWidth;
 	CamRotateSet = true;
 	MousePos = PosXY( x, y );

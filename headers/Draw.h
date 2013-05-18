@@ -19,9 +19,10 @@ namespace Draw
 	void Generic( int , std::vector< Pos* >& );
 	void Generic( PosManager& );
 	// void Generic( PosManager );
+	void GridXY();
 	
 	void CubeLP( float length, PosXYZ position, ColorRGBA C1 = 1.0);
-
+	void CubeLPM( float length, PosXYZ position, bool* FaceMatrix );
 };
 
 #endif

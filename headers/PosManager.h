@@ -38,6 +38,7 @@ public:
     }
     
     void makeAxisXY( ColorRGBA C = 0 );
+    void makeGridXY( ColorRGBA C = 0 );
     
     std::vector< Pos* >& getOutput() { return m_output; }
     int getType() const { return draw_type; }

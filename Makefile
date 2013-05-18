@@ -6,6 +6,10 @@ TEST3D = test3d.cpp src/*.cpp
 
 TESTCAM = testCam.cpp src/*.cpp
 
+TESTMIN = testMin.cpp src/*.cpp
+
+TESTMINX = testMinX.cpp src/*.cpp headers/*.h
+
 run: $(RUN)
 	g++ $(RUN) $(LIB) -o $@
 
@@ -14,6 +18,12 @@ test3d: $(TEST3D)
 
 testCam: $(TESTCAM)
 	g++ $(TESTCAM) $(LIB) -o $@
+	
+testMin: $(TESTMIN)
+	g++ $(TESTMIN) $(LIB) -o $@
+
+testMinX: $(TESTMINX)
+	g++ $(TESTMINX) $(LIB) -o $@
 	
 clean:
 	rm ./run

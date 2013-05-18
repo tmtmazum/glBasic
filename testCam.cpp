@@ -15,33 +15,35 @@
 using namespace std;
 
 /* Game State Constants */
-int ModelView_MatrixStack = 0;
-Camera Cam; 
+int WindowWidth = 640;
+int WindowHeight = 400;
+Camera* Cam;
 
-//	---
+// ---
+
+void drawObjects()
+{
+	glColor3f(1.0, 1.0, 1.0);
+	PosManager P;
+	P.makeGridXY();
+	Draw::Generic( P );
+}
+
+void drawHUD()
+{
+}
 
 void draw()
 {
-    PosManager Axis;
-    Axis.makeAxisXY( ColorRGBA(1.0, 1.0, 1.0, 1.0 ) );
-  
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    if( Cam.changed )
-    {
-	glLoadIdentity();
-	gluLookAt( Cam.eye.X, Cam.eye.Y, Cam.eye.Z,
-		   Cam.center.X, Cam.center.Y, Cam.center.Z,
-		   Cam.up.X, Cam.up.Y, Cam.up.Z );
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     
-	Cam.changed = false;
-    }
-      	// Draw::Generic( GL_LINES, Axis );
-	Draw::Generic( Axis );
+    Cam->resetView();
     
-	Draw::CubeLP( 0.3f, PosXYZ(), ColorRGBA(1.0, 0.1, 0.1));
+    drawObjects();
+    
+    Cam->resetAndUpdateView();
+    
     glutSwapBuffers();
-
 }
 
 void handleKeyPress(unsigned char key, int x, int y)
@@ -71,17 +73,19 @@ void handleSpecialPress(int key, int x, int y)
 	    break;
 	case GLUT_KEY_DOWN:
 	    break;
-	case GLUT_KEY_F3:
-	    glMatrixMode( GL_MODELVIEW );
-	    glPopMatrix();
-	    glPushMatrix();
-	    break;
     } 
 }
 
 bool pressLMB = false;
 bool pressMMB = false;
 bool pressRMB = false;
+
+PosXY MousePos;
+
+PosXY getMouseDiff( int x, int y )
+{
+    return PosXY( (x - MousePos.X)/WindowWidth, (y - MousePos.Y)/WindowHeight );
+}
 
 void handleMouse(int button, int state,
                   int x, int y)
@@ -91,46 +95,41 @@ void handleMouse(int button, int state,
 	case GLUT_LEFT_BUTTON:
 	    if(state==GLUT_DOWN) pressLMB = true;
 	    else if(state==GLUT_UP) pressLMB = false;
+	    MousePos = PosXY( x, y );
 	    break;
 	case GLUT_MIDDLE_BUTTON:
 	    if(state==GLUT_DOWN) pressMMB = true;
 	    else if(state==GLUT_UP) pressMMB = false;
+	    MousePos = PosXY( x, y );
 	    break;
 	case GLUT_RIGHT_BUTTON:
 	    if(state==GLUT_DOWN) pressRMB = true;
 	    else if(state==GLUT_UP) pressRMB = false;
+	    MousePos = PosXY( x, y );
 	    break;
     }
 }
-
 void handleMotion(int x, int y)
 {
+    PosXY Diff = getMouseDiff(x,y);
     if(pressLMB)
     {
-	
+	Cam->addTranslate( PosXYZ(Diff.X, Diff.Y, 0.0) );
     }
     if(pressMMB)
     {
-	
+	Cam->addRotate( PosXYZ(0.0, 0.0, Diff.X) );
     }
     if(pressRMB)
     {
-    
-	
+	// glScalef(Diff.Y * 64,Diff.Y * 64,Diff.Y * 64);
     }
 }
 
-void initView()
-// This is my own initialize function
+void glSettings()
 {
-    /*glMatrixMode(GL_PROJECTION);
-    gluPerspective( 40.0, 1.0, 1.0, 10.0 ); */
-  
-    glMatrixMode( GL_MODELVIEW );
-    glLoadIdentity();
+
     
-    glPushMatrix();
-    ModelView_MatrixStack += 1;
 }
 
 int main(int argc, char** argv)
@@ -138,11 +137,14 @@ int main(int argc, char** argv)
   glutInit(&argc, argv);
   
   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
-  glutInitWindowSize(300,300);
+  glutInitWindowSize(WindowWidth , WindowHeight);
   glutInitWindowPosition(10,10);
   glutCreateWindow("glTest");
 
-  initView();
+  Camera C(WindowWidth, WindowHeight);
+  Cam = &C;
+  
+  glSettings();
   
   glutDisplayFunc(draw);
   /* where draw(): lambda<void> */

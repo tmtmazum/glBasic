@@ -84,9 +84,17 @@ class PosXYZ : public Pos
 		PosY Y;
 		PosZ Z;
 		
+		float* array;
+		
 	public:
 		PosXYZ(float f1=0, float f2=0, float f3=0): 
-			    Pos(), X(f1), Y(f2), Z(f3) {}
+			    Pos(), X(f1), Y(f2), Z(f3) 
+		{ 
+		    array = new float[3];
+		    array[0] = X;
+		    array[1] = Y;
+		    array[2] = Z;
+		}
 			    
 		PosXYZ( const PosXYZ& P1 ):
 			    Pos(), X(P1.X), Y(P1.Y), Z(P1.Z) {}
@@ -115,8 +123,26 @@ class PosXYZ : public Pos
 		    return root_sum_of_squares(P1.X - X, P1.Y - Y, P1.Z - Z);
 		}
 		
+		void operator+=( const PosXYZ& P1 )
+		{
+		    X += P1.X;
+		    Y += P1.Y;
+		    Z += P1.Z;
+		}
+		
 		PosXY toXY() { return PosXY( X, Y ); }
 		
+		
+		float* toArray()
+		{
+		    array = new float[3];
+		    array[0] = X;
+		    array[1] = Y;
+		    array[2] = Z;
+		    return array;
+		}
+		
+		~PosXYZ() { if(array) delete array; }
 		void getVertex();
 };
 
@@ -135,7 +161,7 @@ public:
     PosRPT(const PosRPT& P1) : 
 	radius( P1.radius ), phi( P1.getPhi() ), theta( P1.getTheta() ) {}
     
-    PosRPT(const PosXYZ& P1);	// DEFINE THIS
+    PosRPT(const PosXYZ& P1);	// DEFINED
     
     float getPhi() const { return phi; }
     float getTheta() const { return theta; }

@@ -17,6 +17,38 @@ void PosManager::makeAxisXY( ColorRGBA C )
 	}
     
     this->placement = PosXYZ( 0.0, 0.0, 0.0 );
+    drawReady = true;
+}
+
+void PosManager::makeGridXY( ColorRGBA C )
+{
+    clear();
+    draw_type = GL_LINES;
+    for(float i = -1.0; i < 1.0; i += 0.1)
+    {
+	m_output.push_back( new PosXY( 1.0, i ));
+	m_output.push_back( new PosXY( -1.0,i ));
+    }
+    for(float i = -1.0; i < 1.0; i += 0.1)
+    {
+	m_output.push_back( new PosXY( i, 1.0 ));
+	m_output.push_back( new PosXY( i, -1.0 ));
+    }
+    PosXYZ* p = new PosXYZ( 0.0, 0.0, 0.0 );
+    ColorRGBA Red( 1.0, 0.0, 0.0, 1.0 );
+    p->setColor( Red );
+    m_output.push_back( p );
+    m_output.push_back( new PosXYZ( 0.0, 0.0, 1.0 ) );
+    for(std::vector< Pos* >::iterator m = m_output.begin();
+	    m != m_output.end(); ++m)
+	{
+	    (*m)->setColor( C );
+	    break;
+	}
+    this->placement = PosXYZ( 0.0, 0.0, 0.0 );
+    drawReady = true;
+    //m_output.push_back( new PosXY( 0.0, 1.0 ));
+    //m_output.push_back( new PosXY( 0.0, -1.0 ));
 }
 
 void PosManager::genOutput( GO_SQUARE& GS1)

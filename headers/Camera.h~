@@ -1,30 +1,134 @@
 #ifndef __CAMERA_H__
 #define __CAMERA_H__
 
+#include <cmath>
+
 #include "Pos.h"
+#include "DEBUG.h"
+#include <GL/glut.h>
 
 class Camera
 {public:
-    PosXYZ eye;
-    PosXYZ center;
-    PosXYZ up;
-    bool changed;
+    PosXYZ translateXYZ;
+    PosXYZ rotateXYZ;
+    PosXYZ scaleXYZ;
+    /*
+    PosXYZ rateTranslateXYZ;
+    PosXYZ rateRotateXYZ;
+    PosXYZ rateScaleXYZ;
+    */
     
-    Camera(): eye( 0.0, 0.0, -100.0f ), center( 0.0, 0.0, 0.0 ), 
-	up(0.0, 1.0, 0.0), changed(true) {}
+    float rotateSpeed;
+    float translateSpeed;
+    float scaleSpeed;
     
-    void setEye(float f1, float f2, float f3) { eye = PosXYZ(f1,f2,f3); changed = true; }
-    void setCenter(float f1, float f2, float f3) { center = PosXYZ(f1,f2,f3); changed = true; }
-    void setUp(float f1, float f2, float f3) { up = PosXYZ(f1,f2,f3); changed = true; }
+    PosXY Aspect;
+    PosXY WindowSize;
     
-    bool MoveSet;
-    bool RotateSet;
+    Camera() : Aspect(2.5, 2.5), WindowSize(800,600),
+    translateXYZ(0.0,0.0,0.0), rotateXYZ(0.0, 0.0, 0.0),
+    scaleXYZ(1.0,1.0,1.0)
+    {
+    }
     
-    PosXYZ NextMove;
-    PosXYZ NextRotate;
-    PosXYZ NextCenter;
+    void init()
+    {
+	rotateSpeed= 0.5;
+	translateSpeed= 0.01;
+	scaleSpeed= 1.0;
+	
+	setView1();
+	
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity();
+	gluPerspective(45, WindowSize.X/WindowSize.Y, Aspect.X, Aspect.Y);
+	
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	
+	float tmpArray[4] = { 1.0, 1.0, 1.0, 0.6 };
+//	float tmpArray2[4] = { 1.0, 1.0, 1.0, 0.3 };
+	float off[4] = { 0.0, 0.0, 0.0, 0.0 };
+	glLightfv(GL_LIGHT0, GL_POSITION, tmpArray);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, tmpArray);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, tmpArray);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, tmpArray);
+			
+	glShadeModel( GL_SMOOTH );
+	glEnable( GL_DEPTH_TEST );
+    }
     
+    void setView1()
+    {
+	translateXYZ = PosXYZ(0,0,0);
+	rotateXYZ = PosXYZ(450,0,95);
+	scaleXYZ = PosXYZ(10,10,10);
+    }
     
+    void printView()
+    {
+	DEBUG("Transl.X", translateXYZ.X);
+	DEBUG("Transl.Y", translateXYZ.Y);
+	DEBUG("Transl.Z", translateXYZ.Z);
+	
+	DEBUG("Rot.X", rotateXYZ.X);
+	DEBUG("Rot.Y", rotateXYZ.Y);
+	DEBUG("Rot.Z", rotateXYZ.Z);
+	
+	DEBUG("Scale.X", scaleXYZ.X);
+	DEBUG("Scale.Y", scaleXYZ.Y);
+	DEBUG("Scale.Z", scaleXYZ.Z);
+    }
+    
+    void addRotate(PosXY MouseDiff)
+    {
+	if(rotateXYZ.X-MouseDiff.Y > 180
+	    && rotateXYZ.X-MouseDiff.Y < 540 )*/
+	    rotateXYZ.X -= MouseDiff.Y;
+	/*
+	if(rotateXYZ.Z-MouseDiff.X > -180
+	    && rotateXYZ.Z-MouseDiff.X < 180)*/
+	    rotateXYZ.Z -= MouseDiff.X;
+    }
+    
+    void addTranslate( PosXY MouseDiff )
+    {
+	translateXYZ.Y -= MouseDiff.Y;
+	translateXYZ.X += MouseDiff.X;
+    }
+    
+    void addScale( PosXY MouseDiff )
+    {
+	float del = scaleXYZ.X - (MouseDiff.Y/100);
+	del = 0.0 > del ? 0.0 : del;
+	scaleXYZ.X = del;
+	scaleXYZ.Y = del;
+	scaleXYZ.Z = del;
+    }
+    
+    void update()
+    {
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity();
+	
+	glRotatef(rotateSpeed*rotateXYZ.X, 1.0, 0.0, 0.0);
+	glRotatef(rotateSpeed*rotateXYZ.Y, 0.0, 1.0, 0.0);
+	glRotatef(rotateSpeed*rotateXYZ.Z, 0.0, 0.0, 1.0);
+    
+	updateTranslate();
+	
+	glScalef( scaleXYZ.X * scaleSpeed,
+		  scaleXYZ.Y * scaleSpeed,
+		    scaleXYZ.Z * scaleSpeed);
+    }
+    
+    void updateTranslate()
+    {
+	glTranslatef(translateXYZ.X * translateSpeed, 
+		     translateXYZ.Y * translateSpeed,
+		    translateXYZ.Z * translateSpeed);
+    }
+
 };
 
 #endif
