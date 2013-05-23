@@ -9,7 +9,7 @@
 #include "headers/transform.h"
 #include "headers/PosManager.h"
 #include "headers/GEOMETRY.h"
-#include "headers/Camera.h"
+#include "headers/CameraCEU.h"
 #include "headers/Material.h"
 
 #include <GL/glut.h>
@@ -24,7 +24,7 @@ bool pressMMB = false;
 bool pressRMB = false;
 PosXY MousePos;
 
-Camera Cam;
+CameraCEU Cam;
 
 PosXY SphereRotate(0.0, 0.0);
 
@@ -36,33 +36,37 @@ void drawObjects()
     
     PosXYZ PosSphere(0.5, 0.0, 0.0);
     // SphereRotate.X += 0.01;
-    SphereRotate.Y += 0.01;
+    SphereRotate.Y += 0.001;
     PosSphere = 
 	transform::rotateXYZaboutOrigin( PosSphere, SphereRotate.X, SphereRotate.Y );
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
 	// Materials::all.get();
 	glDisable(GL_LIGHTING);
 	glShadeModel(GL_FLAT);
 	Draw::GridXY();
 	glEnable(GL_LIGHTING);
+	glShadeModel(GL_SMOOTH);
 	
 	Colors::Red.get();
 	// glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, Colors::White.toArray());
 	Materials::chrome.get();
 	Draw::CubeLPM(0.1, PosXYZ(0.2,0.2,0.1), bl);
 	
-	glShadeModel(GL_SMOOTH);
+
 	Draw::CubeLPM(0.1, PosXYZ(-0.2,-0.2,0.1), bl);
 
 	glTranslatef(PosSphere.X, PosSphere.Y, PosSphere.Z);
-	Colors::Red.get();
-	glutSolidSphere(0.1, 6, 6);
+	Materials::pearl.get();
+	// Colors::Blue.get();
+	glutSolidSphere(0.1, 20, 20);
 	glTranslatef(-PosSphere.X, -PosSphere.Y, -PosSphere.Z);
 	
+	Materials::chrome.get();
 	bl[0] = false; bl[1] = false;
 	glShadeModel(GL_SMOOTH);
 	Draw::CubeLPM(1.0, PosXYZ(0.0, 0.0, 1.0), bl);
+	
+	Cam.drawCenter();
 	
     glutSwapBuffers();
 }
@@ -74,15 +78,17 @@ void draw()
 
 void redraw()
 {
-    if(pressLMB) Cam.addTranslate( MouseDiff );
-    if(pressMMB) Cam.addRotate( MouseDiff );
-    if(pressRMB) Cam.addScale( MouseDiff );
+    
+    if(pressLMB) Cam.translateXYZ( MouseDiff );
+    if(pressMMB) Cam.rotateXYZ( MouseDiff );
+    if(pressRMB) Cam.scaleXYZ( MouseDiff );
+    
     Cam.update();
     drawObjects();
 }
 
 
-void handleKeyPress( unsigned char key, int x, int y)
+void handleKeyPress( unsigned char key, int x, int y )
 {
     switch(key)
     {
@@ -112,10 +118,10 @@ void handleSpecialPress( int key, int x, int y )
 	    Cam.printView();
 	    break;
 	case GLUT_KEY_F2:
-	    Cam.setView1();
+	    // Cam.setView1();
 	    break;
 	case GLUT_KEY_F3:
-	    Cam.printMatrix();
+	    // Cam.printMatrix();
 	    break;
     }
 }
@@ -143,7 +149,7 @@ void handleMousePress( int button, int state, int x, int y )
 	    else if(state==GLUT_UP) 
 	    {
 		pressMMB = false;
-		MouseDiff = PosXY(0,0);
+		// MouseDiff = PosXY(0,0);
 	    }
 	    MousePos = PosXY( x, y );
 	    break;
@@ -158,19 +164,7 @@ void handleMousePress( int button, int state, int x, int y )
 void handleMouseMotion( int x, int y )
 {
     MouseDiff = getMouseDiff(x,y);
-    if(pressLMB)
-    {
-	/*
-	std::cerr << "Got here w/ " << MouseDiff.X << ", " << MouseDiff.Y
-	<< std::endl;*/
-	Cam.addTranslate( MouseDiff );
-	// glTranslatef(0.01* MouseDiff.X, 0.01* MouseDiff.Y, 0.0);
-	/*
-	Cam.addTranslate( MouseDiff );
-	Cam.updateTranslate();*/
-    }
 }
-
 
 int main(int argc, char** argv)
 {

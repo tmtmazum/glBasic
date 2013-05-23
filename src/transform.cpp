@@ -50,6 +50,23 @@ void transform::rotateXYZ( PosXYZ& target, const PosXYZ& pivot,
     angleRAD theta = */
 }   
 
+PosXYZ transform::rotateXYZaboutOrigin( PosXYZ& target, const angleRAD& phi_rotation,
+				      const angleRAD& theta_rotation )
+{
+    PosRPT tr( target );
+    tr = rotateRPTaboutOrigin( tr, phi_rotation, theta_rotation );
+    PosXYZ ans( tr );
+    return ans;
+}
+
+PosRPT transform::rotateRPTaboutOrigin( PosRPT& target, const angleRAD& phi_rotation,
+				      const angleRAD& theta_rotation )
+{
+    PosRPT ans( target.radius , target.phi + phi_rotation.value ,
+		target.theta + theta_rotation.value );
+    return ans;
+}
+
 PosXY transform::translateXY( PosXY& target, const PosXY& translation )
 {
     return PosXY( target.X + translation.X, target.Y + translation.Y );

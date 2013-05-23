@@ -10,7 +10,7 @@
 namespace transform
 {
     
-    void rotateXY( PosXY& target, const PosXY& pivot, 
+    PosXY rotateXY( PosXY& target, const PosXY& pivot, 
 	       const angleRAD& angle_of_rotation, 
 	       const bool clockwise = true);
     
@@ -24,6 +24,9 @@ namespace transform
     
     void rotateXYZ( PosXYZ& target, const PosXYZ& pivot, 
 	       const angleRAD& angle_of_rotation, bool clockwise = true);
+    
+    void rotateXYZaboutOrigin( PosXYZ& target, const angleRAD& phi_rotation,
+			       const angleRAD& theta_rotation );
     
     PosXY translateXY( PosXY& target, const PosXY& translation );
     PosXY getRelativeXY( PosXY , PosXY );

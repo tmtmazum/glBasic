@@ -10,6 +10,8 @@ TESTMIN = testMin.cpp src/*.cpp
 
 TESTMINX = testMinX.cpp src/*.cpp headers/*.h
 
+TESTCAMCEU = testCamCEU.cpp src/*.cpp headers/*.h
+
 run: $(RUN)
 	g++ $(RUN) $(LIB) -o $@
 
@@ -24,6 +26,9 @@ testMin: $(TESTMIN)
 
 testMinX: $(TESTMINX)
 	g++ $(TESTMINX) $(LIB) -o $@
+
+testCamCEU: $(TESTCAMCEU)
+	g++ $(TESTCAMCEU) $(LIB) -o $@
 	
 clean:
 	rm ./run

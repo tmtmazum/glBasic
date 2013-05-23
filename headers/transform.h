@@ -25,6 +25,12 @@ namespace transform
     void rotateXYZ( PosXYZ& target, const PosXYZ& pivot, 
 	       const angleRAD& angle_of_rotation, bool clockwise = true);
     
+    PosXYZ rotateXYZaboutOrigin( PosXYZ& target, const angleRAD& phi_rotation,
+			       const angleRAD& theta_rotation );
+    
+    PosRPT rotateRPTaboutOrigin( PosRPT& target, const angleRAD& phi_rotation,
+				 const angleRAD& theta_rotation );
+    
     PosXY translateXY( PosXY& target, const PosXY& translation );
     PosXY getRelativeXY( PosXY , PosXY );
 };

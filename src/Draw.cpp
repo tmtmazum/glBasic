@@ -32,6 +32,11 @@ void Draw::GridXY()
 {
     float indLength = 0.1;
     
+    // Actual Axis is drawn a bit lower
+    // than z=0, so that other objects at
+    // 0 appear above grid
+    float zUnder = -0.00001;
+    
     ColorRGBA G = Colors::Grey;
     G.A = 0.2;
  
@@ -43,13 +48,13 @@ void Draw::GridXY()
 	G.get();		
 	for(float i = -1.0; i < 1.0; i += 0.01)
 	{
-		glVertex3f(i, -1.0, 0.0);
-		glVertex3f(i, 1.0, 0.0);
+		glVertex3f(i, -1.0, zUnder);
+		glVertex3f(i, 1.0, zUnder);
 	}
 	for(float i = -1.0; i < 1.0; i += 0.01)
 	{
-		glVertex3f(-1.0, i, 0.0);
-		glVertex3f(1.0, i, 0.0);
+		glVertex3f(-1.0, i, zUnder);
+		glVertex3f(1.0, i, zUnder);
 	}
 	R.get();
 	glVertex3f(indLength, 0.0, 0.0);

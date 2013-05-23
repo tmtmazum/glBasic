@@ -44,12 +44,12 @@ PosXYZ::PosXYZ(const PosRPT& P1)
 }
 
 PosRPT::PosRPT(const PosXYZ& P1)
-{assert(false);
-    DEBUG("X", P1.X);
-    DEBUG("Y", P1.Y);
-    DEBUG("Z", P1.Z);
+{
+    // DEBUG("X", P1.X);
+    // DEBUG("Y", P1.Y);
+    // DEBUG("Z", P1.Z);
     radius = root_sum_of_squares(P1.X, P1.Y, P1.Z);
-    DEBUG("radius", radius);
+    // DEBUG("radius", radius);
     theta = acos( P1.Z / radius );
     phi = atan( P1.Y / P1.X );
 }

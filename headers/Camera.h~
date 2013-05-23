@@ -1,4 +1,4 @@
-#ifndef __CAMERA_H__
+#if 0
 #define __CAMERA_H__
 
 #include <cmath>
@@ -24,6 +24,8 @@ class Camera
     
     PosXY Aspect;
     PosXY WindowSize;
+    
+    float* transform;
     
     Camera() : Aspect(2.5, 2.5), WindowSize(800,600),
     translateXYZ(0.0,0.0,0.0), rotateXYZ(0.0, 0.0, 0.0),
@@ -80,10 +82,20 @@ class Camera
 	DEBUG("Scale.Z", scaleXYZ.Z);
     }
     
+    void printMatrix()
+    {
+	float mat44[16];
+	glGetFloatv( GL_MODELVIEW , mat44 );
+	for(int i = 0; i < 16; ++i)
+	{
+	    DEBUG("mat44", mat44[i]); 
+	}
+    }
+    
     void addRotate(PosXY MouseDiff)
     {
 	if(rotateXYZ.X-MouseDiff.Y > 180
-	    && rotateXYZ.X-MouseDiff.Y < 540 )*/
+	    && rotateXYZ.X-MouseDiff.Y < 540 )
 	    rotateXYZ.X -= MouseDiff.Y;
 	/*
 	if(rotateXYZ.Z-MouseDiff.X > -180
@@ -93,8 +105,22 @@ class Camera
     
     void addTranslate( PosXY MouseDiff )
     {
-	translateXYZ.Y -= MouseDiff.Y;
+	translateXYZ.Y += MouseDiff.Y;
 	translateXYZ.X += MouseDiff.X;
+	/*
+	transform = new float[16];
+	float* mat = transform;
+	for(int i = 0; i < 16; ++i)
+	{
+	    mat[i] = 0;
+	}
+	mat[0] = 1;
+	mat[5] = 1;
+	mat[10] = 1;
+	
+	mat[13] = MouseDiff.X;
+	mat[14] = MouseDiff.Y;
+	mat[15] = 1;*/
     }
     
     void addScale( PosXY MouseDiff )
@@ -120,13 +146,23 @@ class Camera
 	glScalef( scaleXYZ.X * scaleSpeed,
 		  scaleXYZ.Y * scaleSpeed,
 		    scaleXYZ.Z * scaleSpeed);
+	
+	//glMultMatrixf( transform );
     }
     
     void updateTranslate()
     {
+	/*
+	float mat[16];
+	glGetFloatv( GL_MODELVIEW, mat );
+	mat[0] += translateXYZ.X;
+	mat[1] += translateXYZ.Y;
+	glLoadMatrixf( mat );*/
+	
 	glTranslatef(translateXYZ.X * translateSpeed, 
 		     translateXYZ.Y * translateSpeed,
 		    translateXYZ.Z * translateSpeed);
+		    
     }
 
 };

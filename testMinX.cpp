@@ -16,7 +16,7 @@
 
 using namespace std;
 
-const PosXY WindowSize(800.0, 600.0);
+const PosXY WindowSize(1024.0, 800.0);
 
 PosXY MouseDiff;
 bool pressLMB = false;
@@ -26,12 +26,21 @@ PosXY MousePos;
 
 Camera Cam;
 
+PosXY SphereRotate(0.0, 0.0);
+
 void drawObjects()
 {
     bool bl[6];
     for(int i = 0; i < 6; ++i) bl[i] = false;
     bl[0] = true; bl[1]=true; bl[2]=true;
+    
+    PosXYZ PosSphere(0.5, 0.0, 0.0);
+    // SphereRotate.X += 0.01;
+    SphereRotate.Y += 0.001;
+    PosSphere = 
+	transform::rotateXYZaboutOrigin( PosSphere, SphereRotate.X, SphereRotate.Y );
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
 	// Materials::all.get();
 	glDisable(GL_LIGHTING);
 	glShadeModel(GL_FLAT);
@@ -45,6 +54,16 @@ void drawObjects()
 	
 	glShadeModel(GL_SMOOTH);
 	Draw::CubeLPM(0.1, PosXYZ(-0.2,-0.2,0.1), bl);
+
+	glTranslatef(PosSphere.X, PosSphere.Y, PosSphere.Z);
+	Colors::Red.get();
+	glutSolidSphere(0.1, 6, 6);
+	glTranslatef(-PosSphere.X, -PosSphere.Y, -PosSphere.Z);
+	
+	bl[0] = false; bl[1] = false;
+	glShadeModel(GL_SMOOTH);
+	Draw::CubeLPM(1.0, PosXYZ(0.0, 0.0, 1.0), bl);
+	
     glutSwapBuffers();
 }
 
@@ -55,7 +74,7 @@ void draw()
 
 void redraw()
 {
-    // if(pressLMB) Cam.addTranslate( MouseDiff );
+    if(pressLMB) Cam.addTranslate( MouseDiff );
     if(pressMMB) Cam.addRotate( MouseDiff );
     if(pressRMB) Cam.addScale( MouseDiff );
     Cam.update();
@@ -68,12 +87,16 @@ void handleKeyPress( unsigned char key, int x, int y)
     switch(key)
     {
 	case 'w':
+	    // SphereRotate.X += 0.1;
 	    break;
 	case 'a':
+	    // SphereRotate.Y -= 0.1;
 	    break;
 	case 's':
+	    // SphereRotate.X -= 0.1;
 	    break;
 	case 'd':
+	    // SphereRotate.Y += 0.1;
 	    break;
 	case 'l':
 	    break;
@@ -90,6 +113,9 @@ void handleSpecialPress( int key, int x, int y )
 	    break;
 	case GLUT_KEY_F2:
 	    Cam.setView1();
+	    break;
+	case GLUT_KEY_F3:
+	    Cam.printMatrix();
 	    break;
     }
 }
@@ -134,7 +160,11 @@ void handleMouseMotion( int x, int y )
     MouseDiff = getMouseDiff(x,y);
     if(pressLMB)
     {
-	glTranslatef(0.01* MouseDiff.X, 0.01* MouseDiff.Y, 0.0);
+	/*
+	std::cerr << "Got here w/ " << MouseDiff.X << ", " << MouseDiff.Y
+	<< std::endl;*/
+	Cam.addTranslate( MouseDiff );
+	// glTranslatef(0.01* MouseDiff.X, 0.01* MouseDiff.Y, 0.0);
 	/*
 	Cam.addTranslate( MouseDiff );
 	Cam.updateTranslate();*/
