@@ -34,9 +34,9 @@ A very simple &amp; basic wrapper for OpenGL 3D
 
 ^ Inherits from Tier 1 & 2 modules ^
 
-* GEOMETRY.{h,cpp} : provides { GEOMETRY_OBJECT , GO_CUBE , GO_SPHERE }
+* GEOMETRY.{h,cpp} : provides { GEOMETRY_OBJECT , GO_CUBE , GO_SPHERE , etc. }
   - Provides skeletons for defining various geometry structures
-  - Only holds data describes dimensions of object 
+  - Only holds data describing dimensions of objects 
   
 * Material.{h,cpp} : provides class { Material } and namespace { Materials }
   - Provides preset materials for use
