@@ -35,7 +35,7 @@ void Draw::GridXY()
     // Actual Axis is drawn a bit lower
     // than z=0, so that other objects at
     // 0 appear above grid
-    float zUnder = -0.001;
+    float zUnder = -0.00001;
     
     ColorRGBA G = Colors::Grey;
     G.A = 0.2;

@@ -124,7 +124,7 @@ void Draw::CubeLPM(float length, PosXYZ placement, bool* FaceMatrix)
 {
 	PosXYZ cm = placement;
 	float len = length;
-	int draw_type = GL_TRIANGLE_FAN;
+	int draw_type = GL_POLYGON;
 	if( FaceMatrix[0] )
 	{
 		glBegin( draw_type );

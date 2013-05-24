@@ -36,10 +36,9 @@ void drawObjects()
     
     PosXYZ PosSphere(0.5, 0.0, 0.0);
     // SphereRotate.X += 0.01;
-    SphereRotate.Y += 0.01;
+    SphereRotate.Y += 0.001;
     PosSphere = 
 	transform::rotateXYZaboutOrigin( PosSphere, SphereRotate.X, SphereRotate.Y );
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	// Materials::all.get();
 	glDisable(GL_LIGHTING);
@@ -63,8 +62,11 @@ void drawObjects()
 	bl[0] = false; bl[1] = false;
 	glShadeModel(GL_SMOOTH);
 	Draw::CubeLPM(1.0, PosXYZ(0.0, 0.0, 1.0), bl);
-	
-    glutSwapBuffers();
+}
+
+void drawHUD()
+{
+    
 }
 
 void draw()
@@ -78,7 +80,12 @@ void redraw()
     if(pressMMB) Cam.addRotate( MouseDiff );
     if(pressRMB) Cam.addScale( MouseDiff );
     Cam.update();
+    
+    
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     drawObjects();
+    
+    glutSwapBuffers();
 }
 
 
