@@ -3,6 +3,7 @@
 
 #include "Pos.h"
 #include "Color.h"
+#include "GEOMETRY.h"
 #include <vector>
 
 class PosManager;
@@ -19,6 +20,10 @@ namespace Draw
 	void Generic( int , std::vector< Pos* >& );
 	void Generic( PosManager& );
 	// void Generic( PosManager );
+	
+	void Generic( const WO_SINGLE& WS1 );
+	void Generic( const GO_CUBOID& GC1 );
+	
 	void GridXY();
 	
 	void CubeLP( float length, PosXYZ position, ColorRGBA C1 = 1.0);

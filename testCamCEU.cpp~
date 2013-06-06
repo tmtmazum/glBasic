@@ -65,8 +65,14 @@ void drawObjects()
 	// Materials::chrome.get();
 	bl[0] = false; bl[1] = false;
 	glShadeModel(GL_SMOOTH);
+	PosXYZ dis(0.0, 0.0, 0.0);
 	Draw::CubeLPM(1.0, PosXYZ(0.0, 0.0, 1.0), bl);
 	
+	WO_SINGLE WS1( new GO_CUBOID( 0.1, 0.1, 0.1, ~GO_CUBOID::BACK & ~GO_CUBOID::FRONT ) );
+	// WS1.Z = 0.5;
+	WS1[ PosXYZ(0.0, 0.0, 0.5) ] [ PosRPT(3.0, PI/2, 0.0) ];
+	// Cam.Center = PosXYZ( WS1.X, WS1.Y , WS1.Z );
+	Draw::Generic( WS1 );
 	Cam.drawCenter();
 }
 
@@ -167,7 +173,7 @@ void handleSpecialPress( int key, int x, int y )
 	    // Cam.setView1();
 	    break;
 	case GLUT_KEY_F3:
-	    Cam.setEyeToTop()
+	    Cam.setEyeToTop();
 	    // Cam.printMatrix();
 	    break;
     }
@@ -229,8 +235,10 @@ int main(int argc, char** argv)
     glutInitWindowSize(WindowSize.X, WindowSize.Y);
     glutInitWindowPosition(10,10);
     glutCreateWindow("glTest");
-    
-    glutDisplayFunc(draw);
+    glClearColor( 0.7f, 0.7f, 0.7f , 0.5f );
+    /*glEnable (GL_BLEND); 
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    */glutDisplayFunc(draw);
     glutIdleFunc(redraw);
     
     glutKeyboardFunc(handleKeyPress);

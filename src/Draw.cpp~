@@ -124,7 +124,7 @@ void Draw::CubeLPM(float length, PosXYZ placement, bool* FaceMatrix)
 {
 	PosXYZ cm = placement;
 	float len = length;
-	int draw_type = GL_TRIANGLE_FAN;
+	int draw_type = GL_POLYGON;
 	if( FaceMatrix[0] )
 	{
 		glBegin( draw_type );
@@ -179,4 +179,102 @@ void Draw::CubeLPM(float length, PosXYZ placement, bool* FaceMatrix)
 		    glVertex3f( cm.X - len, cm.Y + len, cm.Z + len);
 		glEnd();
 	}
+}
+
+void Draw::Generic( const WO_SINGLE& WS1 )
+{
+    bool toggleTranslate = ((WS1.X != 0) || (WS1.Y != 0) || (WS1.Z != 0) );
+    bool toggleScale = (WS1.transform.radius != 1);
+    bool toggleRotate = true;
+    
+    PosXYZ P1( WS1.X , WS1.Y , WS1.Z );
+	
+    if( toggleRotate )
+    {
+	PosRPT R1( P1 );
+	R1.phi += WS1.transform.phi;
+	R1.theta += WS1.transform.theta;
+	P1 = PosXYZ( R1 );
+	/*WS1.X = P1.X;
+	WS1.Y = P1.Y;
+	WS1.Z = P1.Z;*/
+    }
+    
+    if( toggleTranslate ) glTranslatef( P1.X , P1.Y , P1.Z );
+    if( toggleScale ) glScalef( WS1.transform.radius , WS1.transform.radius , WS1.transform.radius );
+    
+    glRotatef( (angleDEG) angleRAD( WS1.transform.phi ), 0.0, 0.0, 1.0f );
+    
+    GO_CUBOID* GCx = dynamic_cast<GO_CUBOID*>( WS1.GOx );
+    if(GCx != 0) Draw::Generic( *GCx );
+    
+    // glRotatef( (angleDEG) angleRAD( WS1.transform.phi ), 0.0, 0.0, -1.0f );
+    if( toggleScale ) glScalef( 1/WS1.transform.radius , 1/WS1.transform.radius , 1/WS1.transform.radius );
+    if( toggleTranslate ) glTranslatef( -P1.X , -P1.Y , -P1.Z );
+}
+
+void Draw::Generic( const GO_CUBOID& GC1 )
+{
+    int draw_type = GL_POLYGON;
+    
+    if( GC1.enabledFaces & GO_CUBOID::BOTTOM )
+    {
+	glBegin( draw_type );
+	    glVertex3f( + GC1.length, + GC1.width, - GC1.height);
+	    glVertex3f( + GC1.length, - GC1.width, - GC1.height);
+	    glVertex3f( - GC1.length, - GC1.width, - GC1.height);
+	    glVertex3f( - GC1.length, + GC1.width, - GC1.height);
+	glEnd();
+    }
+    
+    if( GC1.enabledFaces & GO_CUBOID::LEFT )
+    {
+	glBegin( draw_type );
+	    glColor4f( 1.0f, 0.0f, 0.0f, 0.5f );
+	    glVertex3f( -GC1.length, GC1.width, GC1.height);
+	    glVertex3f( -GC1.length, - GC1.width, GC1.height);
+	    glVertex3f( -GC1.length, -GC1.width, - GC1.height);
+	    glVertex3f( -GC1.length, + GC1.width, - GC1.height);
+	glEnd();
+    }
+    
+    if( GC1.enabledFaces & GO_CUBOID::BACK )
+    {
+	glBegin( draw_type );
+	    glVertex3f( + GC1.length, - GC1.width,  + GC1.height);
+	    glVertex3f( - GC1.length, - GC1.width,  + GC1.height);
+	    glVertex3f( - GC1.length, - GC1.width,  - GC1.height);
+	    glVertex3f( + GC1.length, - GC1.width,  - GC1.height);
+	glEnd();
+    }
+    
+    if( GC1.enabledFaces & GO_CUBOID::TOP )
+    {
+	glBegin( draw_type );
+	    glVertex3f(  + GC1.length,  + GC1.width,  + GC1.height);
+	    glVertex3f(  + GC1.length,  - GC1.width,  + GC1.height);
+	    glVertex3f(  - GC1.length,  - GC1.width,  + GC1.height);
+	    glVertex3f(  - GC1.length,  + GC1.width,  + GC1.height);
+	glEnd();
+    }
+    
+    if( GC1.enabledFaces & GO_CUBOID::RIGHT )
+    {
+	glBegin( draw_type );
+	    glVertex3f(  + GC1.length,  + GC1.width,  + GC1.height);
+	    glVertex3f(  + GC1.length,  - GC1.width,  + GC1.height);
+	    glVertex3f(  + GC1.length,  - GC1.width,  - GC1.height);
+	    glVertex3f(  + GC1.length,  + GC1.width,  - GC1.height);
+	glEnd();
+    }
+    
+    if( GC1.enabledFaces & GO_CUBOID::FRONT )
+    {
+	glBegin( draw_type );
+	    glVertex3f(  + GC1.length,  + GC1.width,  + GC1.height);
+	    glVertex3f(  - GC1.length,  + GC1.width,  + GC1.height);
+	    glVertex3f(  - GC1.length,  + GC1.width,  - GC1.height);
+	    glVertex3f(  + GC1.length,  + GC1.width,  - GC1.height);
+	glEnd();
+    }
 }
