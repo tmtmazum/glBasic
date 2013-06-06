@@ -12,6 +12,8 @@ TESTMINX = testMinX.cpp src/*.cpp headers/*.h
 
 TESTCAMCEU = testCamCEU.cpp src/*.cpp headers/*.h
 
+TESTGLBASICMAIN = testGlBasicMain.cpp src/*.cpp headers/*.h
+
 run: $(RUN)
 	g++ $(RUN) $(LIB) -o $@
 
@@ -29,6 +31,9 @@ testMinX: $(TESTMINX)
 
 testCamCEU: $(TESTCAMCEU)
 	g++ $(TESTCAMCEU) $(LIB) -o $@
+	
+testGlBasicMain: $(TESTGLBASICMAIN)
+	g++ $(TESTGLBASICMAIN) $(LIB) -o $@
 	
 clean:
 	rm ./run
