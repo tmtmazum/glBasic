@@ -29,6 +29,8 @@ CameraCEU Cam;
 
 PosXY SphereRotate(0.0, 0.0);
 
+PosXYZ MainLight( 0.0 , 0.0 , 0.5 );
+
 void drawObjects()
 {
     bool bl[6];
@@ -36,16 +38,11 @@ void drawObjects()
     bl[0] = true; bl[1]=true; bl[2]=true;
     
     PosXYZ PosSphere(0.5, 0.0, 0.0);
-    // SphereRotate.X += 0.01;
-    SphereRotate.Y += 0.001;
+    if( SphereRotate.X > 2*PI + PI/8) { SphereRotate = PosXY(0.0, 0.0); }
+    else if( SphereRotate.Y > 2*PI + PI/8 ) SphereRotate.X += 0.002;
+    else SphereRotate.Y += 0.002;
     PosSphere = 
 	transform::rotateXYZaboutOrigin( PosSphere, SphereRotate.X, SphereRotate.Y );
-	// Materials::all.get();
-	glDisable(GL_LIGHTING);
-	glShadeModel(GL_FLAT);
-	Draw::GridXY();
-	glEnable(GL_LIGHTING);
-	glShadeModel(GL_SMOOTH);
 	
 	Colors::Red.get();
 	// glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, Colors::White.toArray());
@@ -54,32 +51,81 @@ void drawObjects()
 	
 
 	// Draw::CubeLPM(0.1, PosXYZ(-0.2,-0.2,0.1), bl);
-
+/*
 	glTranslatef(PosSphere.X, PosSphere.Y, PosSphere.Z);
-	// Materials::pearl.get();
-	// Colors::Blue.get();
+	glShadeModel( GL_SMOOTH );
 	glutSolidSphere(0.1, 20, 20);
 	glTranslatef(-PosSphere.X, -PosSphere.Y, -PosSphere.Z);
-	
-	Colors::Blue.get();
+*/	
+	glTranslatef(MainLight.X, MainLight.Y, MainLight.Z);
+	glDisable( GL_LIGHTING );
+	Colors::White.get();
+	glutSolidSphere(0.01, 10, 10);
+	glTranslatef(-MainLight.X, -MainLight.Y, -MainLight.Z);
+	glEnable( GL_LIGHTING );
+	// Colors::Blue.get();
 	// Materials::chrome.get();
 	bl[0] = false; bl[1] = false;
-	glShadeModel(GL_SMOOTH);
 	PosXYZ dis(0.0, 0.0, 0.0);
-	Draw::CubeLPM(1.0, PosXYZ(0.0, 0.0, 1.0), bl);
+	// Draw::CubeLPM(1.0, PosXYZ(0.0, 0.0, 1.0), bl);
 	
-	WO_SINGLE WS1( new GO_CUBOID( 0.1, 0.1, 0.1, ~GO_CUBOID::BACK & ~GO_CUBOID::FRONT ) );
-	// WS1.Z = 0.5;
-	WS1[ PosXYZ(0.0, 0.0, 0.5) ] [ PosRPT(3.0, PI/2, 0.0) ];
-	// Cam.Center = PosXYZ( WS1.X, WS1.Y , WS1.Z );
+	WO_SINGLE WS1( new GO_CUBOID( 0.03, 0.03, 0.03, ~GO_CUBOID::LEFT & ~GO_CUBOID::RIGHT ) );
+	WS1[ PosXYZ(0.0, 0.5, 0.5) ] [ PosRPT(2.0, SphereRotate.Y, SphereRotate.X) ][ Colors::Red ];
+	
 	Draw::Generic( WS1 );
+	
+	Colors::Green.get();
+	glShadeModel( GL_SMOOTH );
+	
+	glTranslatef( 0.0, 0.0, 0.5 );
+	glutSolidSphere(0.1, 20, 20);
+	glTranslatef( 0.0, 0.0, -0.5 );
+	
+	glDepthMask(GL_FALSE);
+	//Draw::GridXYChequered();
+	
+	//glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+	
+	glClear( GL_STENCIL_BUFFER_BIT );
+	glEnable(GL_STENCIL_TEST);
+	glStencilFunc( GL_ALWAYS , 1, 0xFF);
+	glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
+	/*
+	glBegin( GL_POLYGON );
+	    glVertex3f( 1.0, 1.0, 0.0 );
+	    glVertex3f( 1.0, -1.0, 0.0 );
+	    glVertex3f( -1.0, -1.0, 0.0 );
+	    glVertex3f( -1.0, 1.0, 0.0 );
+	glEnd();
+	*/
+	Draw::GridXYChequered();
+	
+	glDepthMask(GL_TRUE);
+	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	glStencilFunc(GL_EQUAL, 1, 0xFF);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+	
+	ColorRGBA Gr1 = Colors::Green;
+	Gr1.A = 0.3;
+	Gr1.get();
+	
+	glTranslatef( 0.0, 0.0, -0.5 );
+	glutSolidSphere(0.1, 20, 20);
+	glTranslatef( 0.0, 0.0, 0.5 );
+	
+	WS1.C.A = 0.3;
+	glScalef(1.0, 1.0, -1.0);
+	Draw::Generic( WS1 );
+	glScalef(1.0, 1.0, -1.0);
+	
+	glDisable(GL_STENCIL_TEST);
+	
 	Cam.drawCenter();
 }
 
 void drawHUD()
 {
     glShadeModel( GL_FLAT );
-    glEnable( GL_LIGHTING );
     Colors::Green.get();
     PosXYZ CamS( Cam.getEyeXYZ() );
     glTranslatef( CamS.X , CamS.Y , CamS.Z );
@@ -94,8 +140,79 @@ void drawHUD()
     
 }
 
+void setLighting(int i = 2)
+{
+    if(i == 1)
+    {
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    
+    float tmpArray[4] = { 0.9, 0.9, 0.9, 1.0 };
+    float lowArray[4] = { 0.3, 0.3, 0.3, 1.0 };
+    float MainLightPos[4] = { MainLight.X , MainLight.Y , MainLight.Z , 0.0 };
+    float MainLightDir[4] = { Cam.Center.X , Cam.Center.Y , Cam.Center.Z };
+//	float tmpArray2[4] = { 1.0, 1.0, 1.0, 0.3 };
+    float off[4] = { 0.0, 0.0, 0.0, 0.0 };
+    glLightfv(GL_LIGHT0, GL_POSITION, MainLightPos);
+    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, MainLightDir);
+   //  glLightfv(GL_LIGHT0, GL_SPECULAR, tmpArray);
+    // glLightfv(GL_LIGHT0, GL_DIFFUSE, tmpArray);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, lowArray);
+
+        glShadeModel( GL_SMOOTH );
+    glEnable( GL_DEPTH_TEST );
+
+		    GLfloat mat_specular[] = {0.8, 0.8, 0.8, 1.0};
+GLfloat mat_shininess[] = { 10.0 };
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+
+    glEnable( GL_COLOR_MATERIAL );
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+    // glColorMaterial( GL_FRONT_AND_BACK, GL_SPECULAR );
+    // glDisable( GL_LIGHTING );
+    }
+    else if(i == 2)
+    {
+	float Top[4] = { 0.0, 0.0, 1.0, 0.0 };
+	float Bottom[4] = { 0.0, 0.0, -1.0, 0.0 };
+	float ambientPower[4] = { 0.3, 0.3, 0.3, 1.0 };
+	
+	float specularPower[4] = { 0.8, 0.8, 0.8, 1.0 };
+	float diffusePower[4] = { 0.8, 0.8, 0.8, 1.0 };
+	
+	glLightfv(GL_LIGHT0, GL_POSITION, Top);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientPower);
+	
+	glLightfv(GL_LIGHT1, GL_POSITION, Bottom);
+	glLightfv(GL_LIGHT1, GL_AMBIENT, ambientPower);
+	
+	float Corner[4] = { MainLight.X, MainLight.Y, MainLight.Z, 1.0 };
+	float BottomCorner[3] = {Cam.Center.X, Cam.Center.Y, Cam.Center.Z };
+	glLightfv(GL_LIGHT2, GL_POSITION, Corner);
+	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, BottomCorner);
+	glLightfv(GL_LIGHT2, GL_SPECULAR, specularPower);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, diffusePower);
+	// glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, );
+	
+	glEnable(GL_LIGHTING);
+	glShadeModel( GL_SMOOTH );
+	glEnable(GL_LIGHT0);
+	glEnable(GL_LIGHT1);
+	glEnable(GL_LIGHT2);
+	glEnable( GL_COLOR_MATERIAL );
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glEnable( GL_DEPTH_TEST );
+    }
+    else
+    {
+	// glDisable( GL_LIGHTING );
+    }
+}
+
 void draw()
 {
+    setLighting();
     Cam.update();
     
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -108,19 +225,23 @@ void draw()
 
 void redraw()
 {
-    
-    if(pressLMB) Cam.translateXYZ( MouseDiff );
-    if(pressMMB) Cam.rotateXYZ( MouseDiff );
+    setLighting();
+    if(pressMMB) Cam.translateXYZ( MouseDiff );
+    if(pressLMB) Cam.rotateXYZ( MouseDiff );
     if(!pressLMB && !pressMMB && !pressRMB/* && lastButton==1*/)
     {
 	switch(lastButton)
 	{
-	    // case 0: Cam.translateXYZ( MouseDiff ); break;
-	    case 1: Cam.rotateXYZ( MouseDiff ); break;
+	    case 0: Cam.rotateXYZ( MouseDiff ); break;
+	    // case 1: Cam.rotateXYZ( MouseDiff ); break;
 	    case 2: Cam.scaleXYZ( MouseDiff ); break;
 	}
 	MouseDiff.X = (MouseDiff.X < 0.00001 && MouseDiff.X > -0.0000001 ? 0 : MouseDiff.X / 1.007 );
 	MouseDiff.Y = (MouseDiff.Y < 0.00001 && MouseDiff.Y > -0.0000001 ? 0 : MouseDiff.Y / 1.007 );
+	
+	// if(Cam.Eye.theta > (PI/2)) assert(false);
+	Cam.Eye.theta = (Cam.Eye.theta > (PI/2) ? (Cam.Eye.theta - Cam.Eye.theta*abs(Cam.Eye.theta-(PI/2)))  : Cam.Eye.theta);// 0.00001 && MouseDiff.X > -0.0000001 ? 0 : MouseDiff.X / 1.007 );
+	// MouseDiff.Y = (MouseDiff.Y < 0.00001 && MouseDiff.Y > -0.0000001 ? 0 : MouseDiff.Y / 1.007 );
     
 	// MouseDiff.X = (MouseDiff.X < 0.0000001 && MouseDiff.X > -0.0000001 ? 0 : MouseDiff.X - copysign(0.0005,MouseDiff.X) );
 	// MouseDiff.Y = (MouseDiff.Y < 0.0000001 && MouseDiff.Y > -0.0000001 ? 0 : MouseDiff.Y - copysign(0.0005,MouseDiff.Y) );
@@ -143,16 +264,23 @@ void handleKeyPress( unsigned char key, int x, int y )
     switch(key)
     {
 	case 'w':
-	    // SphereRotate.X += 0.1;
+	    MainLight.Z += 0.1;
 	    break;
 	case 'a':
-	    // SphereRotate.Y -= 0.1;
+	    MainLight.X -= 0.1;
 	    break;
 	case 's':
 	    // SphereRotate.X -= 0.1;
+	    MainLight.Z -= 0.1;
 	    break;
 	case 'd':
-	    // SphereRotate.Y += 0.1;
+	    MainLight.X += 0.1;
+	    break;
+	case 'q':
+	    MainLight.Y -= 0.1;
+	    break;
+	case 'e':
+	    MainLight.Y += 0.1;
 	    break;
 	case 'l':
 	    break;
@@ -236,9 +364,9 @@ int main(int argc, char** argv)
     glutInitWindowPosition(10,10);
     glutCreateWindow("glTest");
     glClearColor( 0.7f, 0.7f, 0.7f , 0.5f );
-    /*glEnable (GL_BLEND); 
+    glEnable (GL_BLEND); 
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    */glutDisplayFunc(draw);
+    glutDisplayFunc(draw);
     glutIdleFunc(redraw);
     
     glutKeyboardFunc(handleKeyPress);

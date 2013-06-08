@@ -1,5 +1,6 @@
 #include "../headers/Draw.h"
 #include "../headers/PosManager.h"
+#include "../headers/DEBUG.h"
 
 #include <cassert>
 #include <GL/glut.h>
@@ -46,12 +47,12 @@ void Draw::GridXY()
     
     glBegin( GL_LINES );
 	G.get();		
-	for(float i = -1.0; i < 1.0; i += 0.01)
+	for(float i = -1.0; i < 1.0; i += 0.1)
 	{
 		glVertex3f(i, -1.0, zUnder);
 		glVertex3f(i, 1.0, zUnder);
 	}
-	for(float i = -1.0; i < 1.0; i += 0.01)
+	for(float i = -1.0; i < 1.0; i += 0.1)
 	{
 		glVertex3f(-1.0, i, zUnder);
 		glVertex3f(1.0, i, zUnder);
@@ -66,6 +67,37 @@ void Draw::GridXY()
 	glVertex3f(0.0, 0.0, indLength);
 	glVertex3f(0.0, 0.0, 0.0);
     glEnd();
+}
+
+void Draw::GridXYChequered()
+{   
+    float interval = 0.1;
+    float zUnder = 0.0001;
+    
+    ColorRGBA Black( 0.0, 0.0, 0.0, 0.95 );
+    ColorRGBA White( 1.0, 1.0, 1.0, 0.95 );
+    
+    bool alternate = false;
+    
+    for(float i = -1.0; i < (1.0 - interval); i += interval)
+    {
+	if( alternate ) Black.get();
+	else White.get();
+	
+	for(float j = -1.0; j < (1.0 - interval); j += interval)
+	{   
+	    glBegin( GL_POLYGON );
+	    if( alternate ) Black.get();
+	    else White.get();
+		glVertex3f( i , j , zUnder );
+		glVertex3f( i+interval , j , zUnder );
+		glVertex3f( i+interval , j+interval , zUnder );
+		glVertex3f( i , j+interval , zUnder );
+	    glEnd();
+	    
+	    alternate = !alternate;
+	}
+    }
 }
 
 void Draw::CubeLP( float length, PosXYZ position, ColorRGBA C )
@@ -185,7 +217,7 @@ void Draw::Generic( const WO_SINGLE& WS1 )
 {
     bool toggleTranslate = ((WS1.X != 0) || (WS1.Y != 0) || (WS1.Z != 0) );
     bool toggleScale = (WS1.transform.radius != 1);
-    bool toggleRotate = true;
+    bool toggleRotate = false;
     
     PosXYZ P1( WS1.X , WS1.Y , WS1.Z );
 	
@@ -203,11 +235,21 @@ void Draw::Generic( const WO_SINGLE& WS1 )
     if( toggleTranslate ) glTranslatef( P1.X , P1.Y , P1.Z );
     if( toggleScale ) glScalef( WS1.transform.radius , WS1.transform.radius , WS1.transform.radius );
     
-    glRotatef( (angleDEG) angleRAD( WS1.transform.phi ), 0.0, 0.0, 1.0f );
+    angleDEG transPhi( angleRAD( WS1.transform.getPhi() ) );
+    angleDEG transTheta( angleRAD( WS1.transform.getTheta() ) );
+    glRotatef( transPhi , 0.0, 0.0, 1.0f );
+    glRotatef( transTheta , 1.0 , 0.0 , 0.0 );
+    
+    //glRotatef( (angleDEG) angleRAD( WS1.transform.phi ), 0.0, 0.0, 1.0f );
+    
+    ColorRGBA C2 = WS1.C;
+    C2.get();
     
     GO_CUBOID* GCx = dynamic_cast<GO_CUBOID*>( WS1.GOx );
     if(GCx != 0) Draw::Generic( *GCx );
     
+    glRotatef( -transTheta , 1.0 , 0.0 , 0.0 );
+    glRotatef( -transPhi , 0.0, 0.0, 1.0f );
     // glRotatef( (angleDEG) angleRAD( WS1.transform.phi ), 0.0, 0.0, -1.0f );
     if( toggleScale ) glScalef( 1/WS1.transform.radius , 1/WS1.transform.radius , 1/WS1.transform.radius );
     if( toggleTranslate ) glTranslatef( -P1.X , -P1.Y , -P1.Z );

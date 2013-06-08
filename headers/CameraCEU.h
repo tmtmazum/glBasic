@@ -37,20 +37,6 @@ struct CameraCEU
 	WindowSize = PosXY(1024, 800);
 	clipNear = 0.0001; 
 	clipFar =6.0;
-		
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	
-	float tmpArray[4] = { 1.0, 1.0, 1.0, 0.6 };
-//	float tmpArray2[4] = { 1.0, 1.0, 1.0, 0.3 };
-	float off[4] = { 0.0, 0.0, 0.0, 0.0 };
-	glLightfv(GL_LIGHT0, GL_POSITION, tmpArray);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, tmpArray);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, tmpArray);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, tmpArray);
-			
-	glShadeModel( GL_SMOOTH );
-	glEnable( GL_DEPTH_TEST );
 	
     }
     
@@ -138,10 +124,12 @@ struct CameraCEU
     
     void rotateXY( float f )
     {
-	if((Eye.theta - f) > (PI/2))
-	    Eye.theta = PI/2;
-	else if((Eye.theta - f) < 0.0)
-	    Eye.theta = 0.01;
+	float MAX_THETA = (PI/2) + (PI/32);
+	float MIN_THETA = 0.01;
+	if((Eye.theta - f) > MAX_THETA)
+	    Eye.theta = MAX_THETA;
+	else if((Eye.theta - f) < MIN_THETA)
+	    Eye.theta = MIN_THETA;
 	//if( (Eye.theta - f) >= 0.0 && (Eye.theta - f) <= (PI/2))
 	else    
 	    Eye.theta -= f;

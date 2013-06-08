@@ -25,6 +25,7 @@ namespace Draw
 	void Generic( const GO_CUBOID& GC1 );
 	
 	void GridXY();
+	void GridXYChequered();
 	
 	void CubeLP( float length, PosXYZ position, ColorRGBA C1 = 1.0);
 	void CubeLPM( float length, PosXYZ position, bool* FaceMatrix );

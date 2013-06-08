@@ -1,6 +1,7 @@
 #ifndef GLBASICMAIN_H
 #define GLBASICMAIN_H
-
+#endif
+#if false
 #include <iostream>
 #include <vector>
 #include <string>
