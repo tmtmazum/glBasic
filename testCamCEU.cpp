@@ -72,6 +72,8 @@ void drawObjects()
 	WO_SINGLE WS1( new GO_CUBOID( 0.03, 0.03, 0.03, ~GO_CUBOID::LEFT & ~GO_CUBOID::RIGHT ) );
 	WS1[ PosXYZ(0.0, 0.5, 0.5) ] [ PosRPT(2.0, SphereRotate.Y, SphereRotate.X) ][ Colors::Red ];
 	
+	
+	glShadeModel( GL_FLAT );
 	Draw::Generic( WS1 );
 	
 	Colors::Green.get();
@@ -90,14 +92,7 @@ void drawObjects()
 	glEnable(GL_STENCIL_TEST);
 	glStencilFunc( GL_ALWAYS , 1, 0xFF);
 	glStencilOp(GL_REPLACE, GL_REPLACE, GL_REPLACE);
-	/*
-	glBegin( GL_POLYGON );
-	    glVertex3f( 1.0, 1.0, 0.0 );
-	    glVertex3f( 1.0, -1.0, 0.0 );
-	    glVertex3f( -1.0, -1.0, 0.0 );
-	    glVertex3f( -1.0, 1.0, 0.0 );
-	glEnd();
-	*/
+	
 	Draw::GridXYChequered();
 	
 	glDepthMask(GL_TRUE);
@@ -113,14 +108,16 @@ void drawObjects()
 	glutSolidSphere(0.1, 20, 20);
 	glTranslatef( 0.0, 0.0, 0.5 );
 	
-	WS1.C.A = 0.3;
+	WS1.C.A = 0.2;
 	glScalef(1.0, 1.0, -1.0);
+	glShadeModel( GL_FLAT );
 	Draw::Generic( WS1 );
+	glShadeModel( GL_SMOOTH);
 	glScalef(1.0, 1.0, -1.0);
 	
 	glDisable(GL_STENCIL_TEST);
 	
-	Cam.drawCenter();
+	// Cam.drawCenter();
 }
 
 void drawHUD()
@@ -176,10 +173,10 @@ GLfloat mat_shininess[] = { 10.0 };
     {
 	float Top[4] = { 0.0, 0.0, 1.0, 0.0 };
 	float Bottom[4] = { 0.0, 0.0, -1.0, 0.0 };
-	float ambientPower[4] = { 0.3, 0.3, 0.3, 1.0 };
+	float ambientPower[4] = { 0.1, 0.1, 0.1, 1.0 };
 	
-	float specularPower[4] = { 0.8, 0.8, 0.8, 1.0 };
 	float diffusePower[4] = { 0.8, 0.8, 0.8, 1.0 };
+	float specularPower[4] = { 0.8, 0.8, 0.8, 1.0 };
 	
 	glLightfv(GL_LIGHT0, GL_POSITION, Top);
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambientPower);
@@ -189,7 +186,10 @@ GLfloat mat_shininess[] = { 10.0 };
 	
 	float Corner[4] = { MainLight.X, MainLight.Y, MainLight.Z, 1.0 };
 	float BottomCorner[3] = {Cam.Center.X, Cam.Center.Y, Cam.Center.Z };
-	glLightfv(GL_LIGHT2, GL_POSITION, Corner);
+	
+	float LightPos[4] = { Cam.Center.X , Cam.Center.Y , Cam.Center.Z - 0.2 , 1.0 };
+	
+	glLightfv(GL_LIGHT2, GL_POSITION, LightPos);
 	glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, BottomCorner);
 	glLightfv(GL_LIGHT2, GL_SPECULAR, specularPower);
 	glLightfv(GL_LIGHT2, GL_DIFFUSE, diffusePower);
@@ -202,6 +202,7 @@ GLfloat mat_shininess[] = { 10.0 };
 	glEnable(GL_LIGHT2);
 	glEnable( GL_COLOR_MATERIAL );
 	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	// glColorMaterial(GL_FRONT_AND_BACK, GL_SPECULAR);
 	glEnable( GL_DEPTH_TEST );
     }
     else

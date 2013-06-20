@@ -14,6 +14,8 @@ TESTCAMCEU = testCamCEU.cpp src/*.cpp headers/*.h
 
 TESTGLBASICMAIN = testGlBasicMain.cpp src/*.cpp headers/*.h
 
+TESTTEXTURE = testTexture.cpp src/*.cpp headers/*.h
+
 run: $(RUN)
 	g++ $(RUN) $(LIB) -o $@
 
@@ -34,6 +36,9 @@ testCamCEU: $(TESTCAMCEU)
 	
 testGlBasicMain: $(TESTGLBASICMAIN)
 	g++ $(TESTGLBASICMAIN) $(LIB) -o $@
+	
+testTexture: $(TESTTEXTURE)
+	g++ $(TESTTEXTURE) $(LIB) -o $@
 	
 clean:
 	rm ./run
