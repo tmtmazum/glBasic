@@ -90,10 +90,12 @@ class PosXYZ : public Pos
 		PosXYZ(float f1=0, float f2=0, float f3=0): 
 			    Pos(), X(f1), Y(f2), Z(f3) 
 		{ 
+		    array = nullptr;
+		    /*
 		    array = new float[3];
 		    array[0] = X;
 		    array[1] = Y;
-		    array[2] = Z;
+		    array[2] = Z;*/
 		}
 			    
 		PosXYZ( const PosXYZ& P1 ):
@@ -142,7 +144,7 @@ class PosXYZ : public Pos
 		    return array;
 		}
 		
-		~PosXYZ() { if(array) delete array; }
+		~PosXYZ() { /* if(array) delete array;*/ }
 		void getVertex();
 };
 

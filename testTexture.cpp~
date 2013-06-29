@@ -2,6 +2,8 @@
 #include <vector>
 #include <cmath>
 #include <cassert>
+#include <cstdlib>
+#include <cstdio>
 
 #include "headers/Color.h"
 #include "headers/Pos.h"
@@ -13,6 +15,7 @@
 #include "headers/Material.h"
 #include "headers/Lighting.h"
 #include "headers/Mouse.h"
+#include "headers/Texture.h"
 
 #include <GL/glut.h>
 
@@ -23,25 +26,77 @@ const PosXY WindowSize(1024.0, 800.0);
 CameraCEU Cam;
 Lighting Lights;
 MouseAB Mouse;
+float tiles = 2.0;
+bool selectedTexture = 0;
+
+void drawHUD()
+{
+/*
+    glDisable( GL_LIGHTING );
+    glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+    // glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f( 1.0 , 0.0 , 0.0 );
+    PosXYZ PosHUD( Cam.Eye );
+    PosHUD.X += Cam.Center.X;
+    PosHUD.Y += Cam.Center.Y;
+    PosHUD.Z += Cam.Center.Z;
+    PosRPT PosHUDr( 0.001 , -Cam.Eye.getPhi() , Cam.Eye.getTheta() );
+    PosXYZ PosHUDx( PosHUDr );
+    glRasterPos4f( PosHUDx.X, PosHUDx.Y, PosHUDx.Z, 1.0 );
+    
+    for(int i = 0; i < 20; ++i)
+    {
+	glBitmap (10, 12, 0.0, 0.0, 11.0, 0.0, rasters);
+	glBitmap (10, 12, 0.0, 0.0, 11.0, 0.0, rasters);
+	glBitmap (10, 12, 0.0, 0.0, 11.0, 0.0, rasters);
+    }
+    
+    glEnable( GL_LIGHTING );
+    */
+}
 
 void drawObjects()
 {
-    unsigned int myTextures[3];
-    glGenTextures( 3 , myTextures );
-    glBindTexture( GL_TEXTURE_2D , myTextures[0] );
-    
-    GL_Boolean Resid[3];
-    glAreTexturesResident(3 , myTextures, Resid);
-    for(int i = 0; i < 3; ++i) assert(Resid[i]);
-    
-    WO_SINGLE WS1( new GO_CUBOID( 0.1, 0, 0.1, 0 | GO_CUBOID::FRONT) );
-    WS1[ PosXYZ(0,0,0.3) ][ PosRPT(2.5, 0.0, 0.0)];
-    Draw::Generic( WS1 );
-    
-    glDeleteTextures( 3 , myTextures );
-    
     Draw::GridXYChequered();
+    
+    glLineWidth( 2.0 );
     Draw::GridXY();
+    glLineWidth( 1.0 );
+    
+    string imageFile1 = "ocean_1.BMP";
+    string imageFile2 = "Qtiles.bmp";
+    Texture TXR( selectedTexture ? imageFile1.c_str() : imageFile1.c_str() );
+    // TXR.drawSample();
+    
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, TXR.textureId);
+    
+    //Use blurry texture mapping (replace GL_LINEAR with GL_NEAREST for blocky)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f); //Don't use special coloring
+    
+    const float tiling_factor = tiles;
+    
+    glBegin( GL_POLYGON );
+	glTexCoord2f( 0.0, 0.0 );
+	glVertex3f( 0.3, 0 , 0.1 );
+	
+	glTexCoord2f( 0.0, 1.0*tiling_factor );
+	glVertex3f( -0.3, 0 , 0.1 );
+	
+	glTexCoord2f( 1.0*tiling_factor, 1.0*tiling_factor );
+	glVertex3f( -0.3 , 0 , 0.6 );
+	
+	glTexCoord2f( 1.0*tiling_factor , 0.0 );
+	glVertex3f( 0.3 , 0 , 0.6 );
+    glEnd();
+    // WO_SINGLE WS1( new GO_CUBOID( 0.1, 0, 0.1, 0 | GO_CUBOID::FRONT) );
+    // WS1[ PosXYZ(0,0,0.3) ][ PosRPT(2.5, 0.0, 0.0)];
+    // Draw::Generic( WS1 );
+    
+    glDisable( GL_TEXTURE_2D );
 }
 
 PosXY getMouseDiff( PosXY Current , PosXY Old )
@@ -92,16 +147,16 @@ float* normalizeRange( float* target , float min, float max )
     
 }*/
 
-void drawHUD()
-{
-    
-}
-
 void draw()
 {
     
 }
 PosXY MouseDiff;
+
+void redraw1()
+{
+    
+}
 
 void redraw()
 {
@@ -139,6 +194,7 @@ void redraw()
     Lights.setMode();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// drawHUD();
 	drawObjects();
 	drawHUD();
 	
@@ -152,12 +208,16 @@ void handleKeyPress( unsigned char key, int x, int y )
     switch(key)
     {
 	case 'w':
+	    tiles += 0.1;
 	    break;
 	case 'a':
+	    selectedTexture = !selectedTexture;
 	    break;
 	case 's':
+	    tiles -= 0.1;
 	    break;
 	case 'd':
+	    selectedTexture = !selectedTexture;
 	    break;
 	case 'q':
 	    break;
@@ -209,10 +269,18 @@ int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode( GLUT_SINGLE | GLUT_RGBA | GLUT_DEPTH );
+ 
     glutInitWindowSize(WindowSize.X, WindowSize.Y);
     glutInitWindowPosition(10,10);
     glutCreateWindow("glTest");
+    
+    // Background Color
     glClearColor( 0.7f, 0.7f, 0.7f , 0.5f );
+    
+    // Enable Transparency
+    glEnable (GL_BLEND); 
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
     glutDisplayFunc(redraw);
     glutIdleFunc(redraw);
     
@@ -224,4 +292,5 @@ int main(int argc, char** argv)
     Cam.init();
     
     glutMainLoop();
+    
 }
