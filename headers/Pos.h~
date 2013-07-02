@@ -4,6 +4,8 @@
 #include "Color.h"
 #include "angle.h"
 #include <math.h>
+#include <string>
+#include <sstream>
 
 #define RT_SUM_OF_SQRS(a, b, c) sqrt( pow(a, 2), pow(b, 2), pow(c, 2) )
 
@@ -17,6 +19,13 @@ class PosXYZ;
 class PosRPT;
 
 float root_sum_of_squares( float t1, float t2, float t3=0 );
+
+std::string inline toString(const float& f)
+{
+    std::ostringstream ss;
+    ss << f;
+    return ss.str();
+}
 
 typedef float PosX;
 typedef float PosY;
@@ -90,7 +99,7 @@ class PosXYZ : public Pos
 		PosXYZ(float f1=0, float f2=0, float f3=0): 
 			    Pos(), X(f1), Y(f2), Z(f3) 
 		{ 
-		    array = nullptr;
+		    array = 0;
 		    /*
 		    array = new float[3];
 		    array[0] = X;
@@ -146,6 +155,7 @@ class PosXYZ : public Pos
 		
 		~PosXYZ() { /* if(array) delete array;*/ }
 		void getVertex();
+		void getVertex(float nX, float nY, float nZ);
 };
 
 class PosRPT : public Pos

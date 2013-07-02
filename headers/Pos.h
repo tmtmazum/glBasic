@@ -4,6 +4,8 @@
 #include "Color.h"
 #include "angle.h"
 #include <math.h>
+#include <string>
+#include <sstream>
 
 #define RT_SUM_OF_SQRS(a, b, c) sqrt( pow(a, 2), pow(b, 2), pow(c, 2) )
 
@@ -146,6 +148,7 @@ class PosXYZ : public Pos
 		
 		~PosXYZ() { /* if(array) delete array;*/ }
 		void getVertex();
+		void getVertex(float nX, float nY, float nZ);
 };
 
 class PosRPT : public Pos

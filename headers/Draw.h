@@ -21,8 +21,11 @@ namespace Draw
 	void Generic( PosManager& );
 	// void Generic( PosManager );
 	
+	void Outline( PosXYZ* DrawPosV );
 	void Generic( const WO_SINGLE& WS1 );
-	void Generic( const GO_CUBOID& GC1 );
+	void Generic( const GO_CUBOID& GC1, bool hasTexture=false , float tilingFactor=1.0 );
+	void Generic( const GO_FACE& GF1 );
+	void Star( const PosXYZ& P1 );
 	
 	void GridXY();
 	void GridXYChequered();

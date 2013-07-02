@@ -1,12 +1,17 @@
 #ifndef __GEOMETRY_H__
 #define __GEOMETRY_H__
 
+#include <string>
+
+#include "VECTOR.h"
 #include "Pos.h"
 #include "Material.h"
 #include "Color.h"
+#include "Texture.h"
 
-class GEOMETRY_OBJECT
+struct GEOMETRY_OBJECT
 {
+    bool SHOW_BLUEPRINT;
     virtual void dummy() {}
 };
 
@@ -26,10 +31,20 @@ class GO_SQUARE : public GEOMETRY_OBJECT
     GO_SQUARE(float f1): length(f1) {}
 };
 
+class GO_FACE : public GEOMETRY_OBJECT
+{public:
+    float width, height;
+    VO_UNIT up, right;
+    
+    GO_FACE( const VO_UNIT& V1, const VO_UNIT& V2 ,
+	     float wid, float hei ) : width(wid), height( hei ),
+			up(V1), right(V2) {}
+};
+
 class GO_CUBOID : public GEOMETRY_OBJECT
 {public:
   float length, width, height;
-  int enabledFaces;
+  int enabledFaces; //bool SHOW_BLUEPRINT;
   enum FACE
   {
     BOTTOM = 1, TOP = 8,
@@ -38,7 +53,7 @@ class GO_CUBOID : public GEOMETRY_OBJECT
   };
   
   GO_CUBOID(float f1, float f2, float f3, int enable = -1):
-    length( f1 ) , width( f2 ), height( f3 ) , enabledFaces( enable ) {}
+    length( f1 ) , width( f2 ), height( f3 ) , enabledFaces( enable ){ SHOW_BLUEPRINT=false; }
     
   int getType() { return 2; }
 };
@@ -51,7 +66,7 @@ class WORLD_OBJECT : public PosXYZ
 class WO_SINGLE : public WORLD_OBJECT
 {public:
     GEOMETRY_OBJECT* GOx;
-    Material M; ColorRGBA C;
+    Material M; ColorRGBA C; Texture T;
     PosRPT transform;	// Rotation + Scale
     
     int enabledOptions;
@@ -63,12 +78,12 @@ class WO_SINGLE : public WORLD_OBJECT
     };
     
 private:
-    WO_SINGLE(): M() , C(), transform(1.0, 0.0, 0.0), enabledOptions(-1) {}
+    WO_SINGLE(): M() , C(), transform(1.0, 0.0, 0.0), enabledOptions(-1), T() {}
     
     void defaultSettings()
     {
 	M = Material();
-	C = ColorRGBA(0.5, 0.5, 0.5, 1.0);
+	C = ColorRGBA(0.5, 0.5, 0.5, 0.5);
 	transform = PosRPT( 1.0, 0.0, 0.0 );
 	enabledOptions = -1;
     }
@@ -113,6 +128,11 @@ public:
 	Y = X1.Y;
 	Z = X1.Z;
 	return *this;
+    }
+    
+    WO_SINGLE& operator[]( const std::string& s )
+    {
+	T = Texture( s.c_str() );
     }
 };
 

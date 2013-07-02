@@ -17,12 +17,39 @@ struct Texture
     // GL Variables:
     // GLuint texBufferID;
     GLuint textureId;
+    float tilingFactor;
     
-    Texture(char* filepath)
+    Texture()
+    {
+	textureId = -1;
+	tilingFactor = 1.0;
+    }
+    
+    Texture( const char* filepath )
     {
 	ImagePWH* myImage = ImagePWH::loadBMP( filepath );
 	textureId = this->load( myImage );
 	delete myImage;
+	
+	tilingFactor = 1.0;
+    }
+    Texture( const Texture& T1 )
+    {
+	this->textureId = T1.textureId;
+	this->tilingFactor = T1.tilingFactor;
+    }
+    
+    void setFiltersToNearest() const
+    {
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);	
+    }
+    
+    void setFiltersToLinear() const
+    // For blurry
+    {
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
     
     void drawSample()
@@ -48,12 +75,23 @@ struct Texture
 	glDisable(GL_TEXTURE_2D); //Switch back to using colors instead of textures
     }
      
+    void enable() const
+    {
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	this->setFiltersToLinear();
+    }
+    void disable() const
+    {
+	glDisable(GL_TEXTURE_2D);
+    }
+    
     ~Texture()
     {
 	glDeleteTextures( 1, &textureId );
     }
     
-private:
+protected:
     GLuint load(ImagePWH* image)
     {
 	GLuint textureId;
@@ -71,5 +109,15 @@ private:
     }
     
 };
+/*
+struct TextureFace : public Texture
+{
+    TextureFace( const char* filepath )
+    {
+	ImagePWH* myImage = ImagePWH::loadBMP( filepath );
+	textureId = this->load( myImage );
+	delete myImage;
+    }
+};*/
 
 #endif

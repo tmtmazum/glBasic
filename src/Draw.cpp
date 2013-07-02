@@ -149,6 +149,39 @@ void Draw::CubeLP( float length, PosXYZ position, ColorRGBA C )
 	glEnd();
 }
 
+void Draw::Generic( const GO_FACE& GF1 )
+{
+    int draw_type = GL_TRIANGLE_STRIP;
+    
+    PosRPT dir_up = PosRPT( 1.0, GF1.up.phi , GF1.up.phi ); //(PosRPT) GF1.up ;
+    dir_up.radius = -GF1.height;
+    
+    PosRPT dir_right =  PosRPT(1.0, GF1.right.phi , GF1.right.phi );;
+    dir_right.radius = -GF1.width;
+    
+    PosRPT P1( dir_up );
+    DEBUG( "DIR_UP radius" , P1.radius );
+    DEBUG( "DIR_UP phi " , P1.phi );
+    DEBUG( "DIR_UP radius" , P1.theta );
+    
+    PosXYZ BottomLeft, BottomRight, TopLeft, TopRight;
+    
+    BottomLeft = PosXYZ( dir_up ) + PosXYZ( dir_right );
+    dir_right.radius = -dir_right.radius;
+    BottomRight = PosXYZ( dir_up ) + PosXYZ( dir_right );
+    dir_up.radius = -dir_up.radius;
+    TopRight = PosXYZ( dir_up ) + PosXYZ( dir_right );
+    dir_right.radius = -dir_right.radius;
+    TopLeft = PosXYZ( dir_up ) + PosXYZ( dir_right );
+    
+    glBegin( draw_type );
+	BottomLeft.getVertex();
+	BottomRight.getVertex();
+	TopLeft.getVertex();
+	TopRight.getVertex();
+    glEnd();
+}
+
 void Draw::CubeLPM(float length, PosXYZ placement, bool* FaceMatrix)
 // FaceMatrix { 0 .. 6 } represents the faces in the direction of
 // 			  { -x, -y, -z, x, y, z }
@@ -242,11 +275,23 @@ void Draw::Generic( const WO_SINGLE& WS1 )
     
     //glRotatef( (angleDEG) angleRAD( WS1.transform.phi ), 0.0, 0.0, 1.0f );
     
+    bool hasTexture = WS1.T.textureId != -1;
+    
+    if( hasTexture )
+    {
+	WS1.T.enable();
+    }
+    
     ColorRGBA C2 = WS1.C;
     C2.get();
     
     GO_CUBOID* GCx = dynamic_cast<GO_CUBOID*>( WS1.GOx );
-    if(GCx != 0) Draw::Generic( *GCx );
+    if(GCx != 0) Draw::Generic( *GCx , hasTexture , WS1.T.tilingFactor );
+    
+    if( hasTexture )
+    {
+	WS1.T.disable();
+    }
     
     glRotatef( -transTheta , 0.0 , 1.0 , 0.0 );
     glRotatef( -transPhi , 0.0, 0.0, 1.0f );
@@ -255,68 +300,332 @@ void Draw::Generic( const WO_SINGLE& WS1 )
     if( toggleTranslate ) glTranslatef( -P1.X , -P1.Y , -P1.Z );
 }
 
-void Draw::Generic( const GO_CUBOID& GC1 )
+void Draw::Outline( PosXYZ* DrawPosV )
+{
+	    float currentColor[4];
+	    glGetFloatv( GL_CURRENT_COLOR , currentColor );
+	    
+	    glColor4f(1.0, 1.0, 1.0, 1.0);
+	    
+	    glDisable( GL_LIGHTING );
+	    
+	    glEnable( GL_LINE_STIPPLE );
+	    unsigned short pattern = 43690;
+	    glLineStipple(5 , pattern);
+	    
+	    glBegin( GL_LINE_STRIP );
+		glVertex3f( 0.0, 0.0, 0.0 );
+		for(int i = 0; i < 4; ++i) DrawPosV[i].getVertex();
+		DrawPosV[0].getVertex();
+	    glEnd();
+	    glDisable( GL_LINE_STIPPLE );
+
+	    glColor4fv( currentColor );
+	    
+	    glEnable( GL_LIGHTING );
+    
+}
+
+void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
 {
     int draw_type = GL_POLYGON;
     
+    PosXYZ DrawPosV[4];
     if( GC1.enabledFaces & GO_CUBOID::BOTTOM )
     {
+	DrawPosV[0] = PosXYZ( + GC1.length, + GC1.width, - GC1.height);
+	DrawPosV[1] = PosXYZ( + GC1.length, - GC1.width, - GC1.height);
+	DrawPosV[2] = PosXYZ( - GC1.length, - GC1.width, - GC1.height);
+	DrawPosV[3] = PosXYZ( - GC1.length, + GC1.width, - GC1.height);
+	
 	glBegin( draw_type );
-	    glVertex3f( + GC1.length, + GC1.width, - GC1.height);
-	    glVertex3f( + GC1.length, - GC1.width, - GC1.height);
-	    glVertex3f( - GC1.length, - GC1.width, - GC1.height);
-	    glVertex3f( - GC1.length, + GC1.width, - GC1.height);
+	    for(int i = 0; i < 4; ++i) 
+	    {
+		DrawPosV[i].getVertex();
+		if(hasTexture)
+		{
+		    float x = tilingFactor*bool(i > 1);
+		    float y = tilingFactor*bool(i==1 || i==2);
+		    glTexCoord2f( x, y );
+		}
+	    }
 	glEnd();
+	
+	if(GC1.SHOW_BLUEPRINT)
+	{
+	    Outline( DrawPosV );
+	}
     }
     
     if( GC1.enabledFaces & GO_CUBOID::LEFT )
     {
+	DrawPosV[0] = PosXYZ( - GC1.length, + GC1.width, + GC1.height);
+	DrawPosV[1] = PosXYZ( - GC1.length, - GC1.width, + GC1.height);
+	DrawPosV[2] = PosXYZ( - GC1.length, - GC1.width, - GC1.height);
+	DrawPosV[3] = PosXYZ( - GC1.length, + GC1.width, - GC1.height);
+	
 	glBegin( draw_type );
-	    glColor4f( 1.0f, 0.0f, 0.0f, 0.5f );
+	    for(int i = 0; i < 4; ++i) 
+	    {
+		DrawPosV[i].getVertex();
+		if(hasTexture)
+		{
+		    glTexCoord2f( (i & 1)*tilingFactor, (i & 2)*tilingFactor );
+		}
+	    }
+	/*
 	    glVertex3f( -GC1.length, GC1.width, GC1.height);
 	    glVertex3f( -GC1.length, - GC1.width, GC1.height);
 	    glVertex3f( -GC1.length, -GC1.width, - GC1.height);
 	    glVertex3f( -GC1.length, + GC1.width, - GC1.height);
-	glEnd();
+	*/glEnd();
+	
+	if(GC1.SHOW_BLUEPRINT)
+	{
+	    Outline( DrawPosV );
+	}
     }
     
     if( GC1.enabledFaces & GO_CUBOID::BACK )
     {
+	DrawPosV[0] = PosXYZ( + GC1.length, - GC1.width, + GC1.height);
+	DrawPosV[1] = PosXYZ( - GC1.length, - GC1.width, + GC1.height);
+	DrawPosV[2] = PosXYZ( - GC1.length, - GC1.width, - GC1.height);
+	DrawPosV[3] = PosXYZ( + GC1.length, - GC1.width, - GC1.height);
+	glBegin( draw_type );
+	    for(int i = 0; i < 4; ++i) 
+	    {
+		DrawPosV[i].getVertex();
+		if(hasTexture)
+		{
+		    glTexCoord2f( (i & 1)*tilingFactor, (i & 2)*tilingFactor );
+		}
+	    }
+	glEnd();/*
 	glBegin( draw_type );
 	    glVertex3f( + GC1.length, - GC1.width,  + GC1.height);
 	    glVertex3f( - GC1.length, - GC1.width,  + GC1.height);
 	    glVertex3f( - GC1.length, - GC1.width,  - GC1.height);
 	    glVertex3f( + GC1.length, - GC1.width,  - GC1.height);
-	glEnd();
+	glEnd();*/
+	
+	if(GC1.SHOW_BLUEPRINT)
+	{
+	    Outline( DrawPosV );
+	}
     }
     
     if( GC1.enabledFaces & GO_CUBOID::TOP )
     {
+	DrawPosV[0] = PosXYZ( + GC1.length, + GC1.width, + GC1.height);
+	DrawPosV[1] = PosXYZ( + GC1.length, - GC1.width, + GC1.height);
+	DrawPosV[2] = PosXYZ( - GC1.length, - GC1.width, + GC1.height);
+	DrawPosV[3] = PosXYZ( - GC1.length, + GC1.width, + GC1.height);
+	glBegin( draw_type );
+	    for(int i = 0; i < 4; ++i) 
+	    {
+		DrawPosV[i].getVertex();
+		if(hasTexture)
+		{
+		    glTexCoord2f( (i & 1)*tilingFactor, (i & 2)*tilingFactor );
+		}
+	    }
+	glEnd();/*
 	glBegin( draw_type );
 	    glVertex3f(  + GC1.length,  + GC1.width,  + GC1.height);
 	    glVertex3f(  + GC1.length,  - GC1.width,  + GC1.height);
 	    glVertex3f(  - GC1.length,  - GC1.width,  + GC1.height);
 	    glVertex3f(  - GC1.length,  + GC1.width,  + GC1.height);
-	glEnd();
+	glEnd();*/
+	
+	if(GC1.SHOW_BLUEPRINT)
+	{
+	    Outline( DrawPosV );
+	}
     }
     
     if( GC1.enabledFaces & GO_CUBOID::RIGHT )
     {
+	DrawPosV[0] = PosXYZ( + GC1.length, + GC1.width, + GC1.height);
+	DrawPosV[1] = PosXYZ( + GC1.length, - GC1.width, + GC1.height);
+	DrawPosV[2] = PosXYZ( + GC1.length, - GC1.width, - GC1.height);
+	DrawPosV[3] = PosXYZ( + GC1.length, + GC1.width, - GC1.height);
 	glBegin( draw_type );
+	    for(int i = 0; i < 4; ++i) 
+	    {
+		DrawPosV[i].getVertex();
+		if(hasTexture)
+		{
+		    glTexCoord2f( (i & 1)*tilingFactor, (i & 2)*tilingFactor );
+		}
+	    }
+	glEnd();
+	/*glBegin( draw_type );
 	    glVertex3f(  + GC1.length,  + GC1.width,  + GC1.height);
 	    glVertex3f(  + GC1.length,  - GC1.width,  + GC1.height);
 	    glVertex3f(  + GC1.length,  - GC1.width,  - GC1.height);
 	    glVertex3f(  + GC1.length,  + GC1.width,  - GC1.height);
 	glEnd();
+	*/
+	if(GC1.SHOW_BLUEPRINT)
+	{
+	    Outline( DrawPosV );
+	}
     }
     
     if( GC1.enabledFaces & GO_CUBOID::FRONT )
     {
+	DrawPosV[0] = PosXYZ(  + GC1.length,  + GC1.width,  + GC1.height);
+	DrawPosV[1] = PosXYZ( - GC1.length, + GC1.width, + GC1.height);
+	DrawPosV[2] = PosXYZ( - GC1.length, + GC1.width, - GC1.height);
+	DrawPosV[3] = PosXYZ( + GC1.length, + GC1.width, - GC1.height);
 	glBegin( draw_type );
+	    for(int i = 0; i < 4; ++i) 
+	    {
+		DrawPosV[i].getVertex();
+		if(hasTexture)
+		{
+		    glTexCoord2f( (i & 1)*tilingFactor, (i & 2)*tilingFactor );
+		}
+	    }
+	glEnd();
+	/*
+	 * glBegin( draw_type );
 	    glVertex3f(  + GC1.length,  + GC1.width,  + GC1.height);
 	    glVertex3f(  - GC1.length,  + GC1.width,  + GC1.height);
 	    glVertex3f(  - GC1.length,  + GC1.width,  - GC1.height);
 	    glVertex3f(  + GC1.length,  + GC1.width,  - GC1.height);
 	glEnd();
+	*/
+	if(GC1.SHOW_BLUEPRINT)
+	{
+	    Outline( DrawPosV );
+	}
     }
+    
+    if(GC1.SHOW_BLUEPRINT)
+    {
+	    float currentColor[4];
+	    glGetFloatv( GL_CURRENT_COLOR , currentColor );
+	    
+	    glDisable( GL_LIGHTING );
+	    PosXYZ SketchPosV[6];
+	    
+	    SketchPosV[0] = PosXYZ( DrawPosV[0].X , 0 , 0 );
+	    SketchPosV[1] = PosXYZ( 0 , 0 , 0 );
+	    
+	    SketchPosV[2] = PosXYZ( 0 , DrawPosV[0].Y, 0 );
+	    SketchPosV[3] = PosXYZ( 0 , 0 , 0 );
+	    
+	    SketchPosV[4] = PosXYZ( 0  , 0 , DrawPosV[3].Z );
+	    SketchPosV[5] = PosXYZ( 0 , 0 , 0 );
+	    
+	    glTranslatef( 0 , 0.0, 0.02 );
+	    Colors::Red.get();
+	    
+	    glBegin( GL_LINES );
+		SketchPosV[0].getVertex();
+		SketchPosV[1].getVertex();
+		
+		SketchPosV[0].getVertex( 0, -0.01, 0 );
+		SketchPosV[0].getVertex( 0, 0.01, 0 );
+		SketchPosV[1].getVertex( 0, -0.01, 0 );
+		SketchPosV[1].getVertex( 0, 0.01, 0 );
+	    glEnd();
+	    
+	    glTranslatef( 0, 0.0, -0.02 );
+	    
+	    glTranslatef( -0.02 , 0, 0.0 );
+	    Colors::Green.get();
+	    glBegin( GL_LINES );
+		SketchPosV[2].getVertex();
+		SketchPosV[3].getVertex();
+		
+		SketchPosV[2].getVertex( -0.01, 0, 0 );
+		SketchPosV[2].getVertex( 0.01, 0, 0 );
+		SketchPosV[3].getVertex( -0.01, 0, 0 );
+		SketchPosV[3].getVertex( 0.01, 0, 0 );
+	    glEnd();
+	    
+	    glTranslatef( 0.02, 0, 0.0 );
+	    Colors::Blue.get();
+	    // glTranslatef( 0.0 , 0.0, 0.0 );
+	    
+	    glBegin( GL_LINES );
+		SketchPosV[4].getVertex();
+		SketchPosV[5].getVertex();
+		
+		SketchPosV[4].getVertex( -0.01, 0, 0 );
+		SketchPosV[4].getVertex( 0.01, 0, 0 );
+		SketchPosV[5].getVertex( -0.01, 0, 0 );
+		SketchPosV[5].getVertex( 0.01, 0, 0 );
+	    glEnd();
+	    // glutStrokeCharacter( GLUT_STROKE_MONO_ROMAN , '0' );
+	    // glTranslatef( 0, 0, -0.02 );
+	    
+	    Colors::Yellow.get();
+	    float r = 0.01;
+	    glBegin( GL_LINES );
+		glVertex3f( -r , -r , 0 );
+		glVertex3f( r , r , 0 );
+		glVertex3f( 0 , -r , -r );
+		glVertex3f( 0 , r , r );
+		glVertex3f( -r , 0 , -r );
+		glVertex3f( r , 0 , r );
+		glVertex3f( -r , -r , -r );
+		glVertex3f( r , r , r );
+		glVertex3f( -r , r , 0 );
+		glVertex3f( r , -r , 0 );
+		glVertex3f( 0 , r , -r );
+		glVertex3f( 0 , -r , r );
+		glVertex3f( -r , 0 , r );
+		glVertex3f( r , 0 , -r );
+	    glEnd();
+	    
+	    glColor4f( 1.0, 1.0, 1.0, 1.0 );
+	    
+	    std::string text;
+	    
+	    glRasterPos3f(SketchPosV[0].X / 2, 0, 0);
+	    text = "X/Z + Left-Click:" + toString( GC1.length );
+	    for(std::string::iterator i = text.begin(); i != text.end(); ++i)
+		glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *i);
+	    
+	    
+	    glRasterPos3f(0, SketchPosV[2].Y / 2, 0);
+	    text = "X/Z + Middle-Mouse:" + toString( GC1.width );
+	    for(std::string::iterator i = text.begin(); i != text.end(); ++i)
+		glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *i);
+	    
+	    glRasterPos3f(0, 0, SketchPosV[4].Z / 2);
+	    text = "X/Z + Right-Click:" + toString( GC1.height );
+	    for(std::string::iterator i = text.begin(); i != text.end(); ++i)
+		glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *i);
+	    
+	    glEnable( GL_LIGHTING );
+	    glColor4fv( currentColor );
+    }
+}
+
+void Draw::Star( const PosXYZ& P1 )
+{
+    glTranslatef( P1.X , P1.Y , P1.Z );
+    float r = 0.01;
+    glBegin( GL_LINES );
+	glVertex3f( -r , -r , 0 );
+	glVertex3f( r , r , 0 );
+	glVertex3f( 0 , -r , -r );
+	glVertex3f( 0 , r , r );
+	glVertex3f( -r , 0 , -r );
+	glVertex3f( r , 0 , r );
+	glVertex3f( -r , -r , -r );
+	glVertex3f( r , r , r );
+	glVertex3f( -r , r , 0 );
+	glVertex3f( r , -r , 0 );
+	glVertex3f( 0 , r , -r );
+	glVertex3f( 0 , -r , r );
+	glVertex3f( -r , 0 , r );
+	glVertex3f( r , 0 , -r );
+    glEnd();
+    glTranslatef( -P1.X , -P1.Y , -P1.Z );
 }

@@ -16,6 +16,8 @@ TESTGLBASICMAIN = testGlBasicMain.cpp src/*.cpp headers/*.h
 
 TESTTEXTURE = testTexture.cpp src/*.cpp headers/*.h
 
+TESTOBJECTS = testObjects.cpp src/*.cpp
+
 run: $(RUN)
 	g++ $(RUN) $(LIB) -o $@
 
@@ -40,6 +42,9 @@ testGlBasicMain: $(TESTGLBASICMAIN)
 testTexture: $(TESTTEXTURE)
 	g++ $(TESTTEXTURE) $(LIB) -o $@
 	
+testObjects: $(TESTOBJECTS)
+	g++ $(TESTOBJECTS) $(LIB) -o $@
+
 clean:
 	rm ./run
 	rm ./test3d
