@@ -49,6 +49,7 @@ class ColorRGBA : public Color
 	
 	~ColorRGBA() { /*delete array;*/ }
       void get();
+      void get(float al);
       float* toArray()
       {
 	    return array;

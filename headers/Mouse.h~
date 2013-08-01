@@ -36,14 +36,17 @@ struct MouseAB
 	    case GLUT_LEFT_BUTTON:
 		buttonsPressed = (new_state ? buttonsPressed | LMB : 
 					buttonsPressed & ~LMB);
+		lastButton = LMB;
 		break;
 	    case GLUT_MIDDLE_BUTTON:
 		buttonsPressed = (new_state ? buttonsPressed | MMB : 
 					buttonsPressed & ~MMB);
+		lastButton = MMB;
 		break;
 	    case GLUT_RIGHT_BUTTON:
 		buttonsPressed = (new_state ? buttonsPressed | RMB : 
 					buttonsPressed & ~RMB);
+		lastButton = RMB;
 		break;
 	}
     }
@@ -73,6 +76,17 @@ struct MouseAB
     PosXY loadPos()
     {
 	return savedPos;
+    }
+    
+    static PosXY getDiffEither( PosXY Current , PosXY Old , PosXY WindowSize )
+    {
+	
+	PosXY MouseDiff( -(Old.X - Current.X), -(Old.Y -Current.Y) );
+	
+	if(abs(MouseDiff.X) > abs(MouseDiff.Y)) MouseDiff = PosXY( MouseDiff.X, 0 );
+	else MouseDiff = PosXY( 0, MouseDiff.Y );
+	
+	return PosXY( MouseDiff.X/WindowSize.X, MouseDiff.Y/WindowSize.Y );
     }
 };
 

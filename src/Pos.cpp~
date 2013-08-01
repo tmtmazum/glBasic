@@ -36,7 +36,7 @@ void PosXYZ::getVertex()
 	glVertex3f( X, Y, Z );
 }
 
-void getVertex(float nX, float nY, float nZ) 
+void PosXYZ::getVertex(float nX, float nY, float nZ) 
 { 
     glVertex3f( X + nX , Y + nY , Z + nZ );
 }    
@@ -46,6 +46,7 @@ PosXYZ::PosXYZ(const PosRPT& P1)
     X = P1.radius * sin(P1.theta) * cos(P1.phi);
     Y = P1.radius * sin(P1.theta) * sin(P1.phi);
     Z = P1.radius * cos(P1.theta);
+    DEBUG("here",0);
 }
 
 PosRPT::PosRPT(const PosXYZ& P1)

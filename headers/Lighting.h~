@@ -27,7 +27,7 @@ struct Lighting
 	// glClear(GL_COLOR_BUFFER_BIT);
 	float Top[4] = { 0.0, 0.0, 1.0, 0.0 };
 	float Bottom[4] = { 0.0, 0.0, -1.0, 0.0 };
-	float ambientPower[4] = { 0.1, 0.1, 0.1, 1.0 };
+	float ambientPower[4] = { 0.0, 0.0, 0.0, 1.0 };
 	
 	float diffusePower[4] = { 0.8, 0.8, 0.8, 1.0 };
 	float specularPower[4] = { 0.8, 0.8, 0.8, 1.0 };
@@ -39,7 +39,7 @@ struct Lighting
 	glLightfv(GL_LIGHT1, GL_AMBIENT, ambientPower);
 	
 	float LightDir[4] = { Center.X , Center.Y , 0.5 , 1.0 };
-	float LightPos[4] = { 0.0, 0.0, 0.5, 1.0 };
+	// float LightPos[4] = { 0.0, 0.0, 0.5, 1.0 };
 	
 	glLightfv(GL_LIGHT2, GL_POSITION, LightDir);
 	glLightfv(GL_LIGHT2, GL_SPECULAR, specularPower);

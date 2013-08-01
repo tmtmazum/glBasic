@@ -65,7 +65,7 @@ void drawObjects()
     
     string imageFile1 = "ocean_1.BMP";
     string imageFile2 = "Qtiles.bmp";
-    Texture TXR( selectedTexture ? imageFile1.c_str() : imageFile2.c_str() );
+    TextureIF TXR( selectedTexture ? imageFile1.c_str() : imageFile2.c_str() );
     // TXR.drawSample();
     
     glEnable(GL_TEXTURE_2D);

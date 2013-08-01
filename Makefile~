@@ -16,7 +16,7 @@ TESTGLBASICMAIN = testGlBasicMain.cpp src/*.cpp headers/*.h
 
 TESTTEXTURE = testTexture.cpp src/*.cpp headers/*.h
 
-TESTOBJECTS = testObjects.cpp src/*.cpp
+TESTOBJECTS = testObjects.cpp src/*.cpp headers/*.h
 
 run: $(RUN)
 	g++ $(RUN) $(LIB) -o $@

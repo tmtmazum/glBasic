@@ -62,6 +62,7 @@ namespace Colors
     static ColorRGBA Blue(0.0, 0.0, 1.0);
     static ColorRGBA Grey(0.5, 0.5, 0.5);
     static ColorRGBA White(1.0, 1.0, 1.0);
+    static ColorRGBA Black(0.0, 0.0, 0.0);
     static ColorRGBA Yellow(1.0 , 1.0, 0.0);
     static ColorRGBA Orange(1.0 , 0.6, 0.0);
     static ColorRGBA DarkOrange(1.0, 0.4, 0.0);

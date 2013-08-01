@@ -23,9 +23,13 @@ namespace Draw
 	
 	void Outline( PosXYZ* DrawPosV );
 	void Generic( const WO_SINGLE& WS1 );
-	void Generic( const GO_CUBOID& GC1, bool hasTexture=false , float tilingFactor=1.0 );
+	void Generic( const GO_CUBOID& GC1, bool hasTexture=false , PosXY tilingFactor=PosXY(0.0,0.0) );
 	void Generic( const GO_FACE& GF1 );
+	void Generic( const GO_CYLINDER& GC );
+	void Generic( const GO_BEZIER_CURVE& BC );
 	void Star( const PosXYZ& P1 );
+	void TriangleStrip( const std::vector< PosXYZ >& V );
+	void TriangleStrip( const std::vector< PosXY >& V );
 	
 	void GridXY();
 	void GridXYChequered();

@@ -59,6 +59,13 @@ PosXYZ ctrlPt1(-0.4, -0.4, 0.0);
 PosXYZ ctrlPt2(0.4, -0.4, 0.0);
 PosXYZ ctrlPt3(0.4, 0.4, 0.0);
 
+int cylSplits = 10;
+bool cylFront = true;
+bool cylBack = true;
+bool cylSides = true;
+
+PosXY tileF(1.0,1.0);
+
 int selection = 0;
 
 void drawSetting()
@@ -70,10 +77,22 @@ void drawSetting()
     // VO_UNIT_RIGHT right1;
     // GO_FACE F( up1 , right1 , 0.2, 0.5 );
     WO_SINGLE obj1( new GO_CUBOID( cubeLength , cubeWidth, cubeHeight , faceNum /*GO_CUBOID::BOTTOM*/ ) ); 
-    obj1[ Colors::DarkOrange ][PosXYZ(cubeX, cubeY, cubeZ )]["Qtiles.bmp"];
+    obj1[ Colors::DarkOrange ][PosXYZ(cubeX, cubeY, cubeZ )];//[new TextureIF("Qtiles.bmp",tileF)];
     if(selection==2) obj1.GOx->SHOW_BLUEPRINT= true;
     obj1.transform.radius = 0.5;
-       
+    
+    WO_SINGLE obj2( new GO_CYLINDER( 0.1, 0.2 , cylSplits, GO_CYLINDER::FRONT*cylFront | GO_CYLINDER::SIDES*cylSides | GO_CYLINDER::BACK*cylBack ) );
+    obj2[ Colors::White ][ PosXYZ(0.5, 0.1, 0.2) ][ PosRPT(1.0, 0.0, 0.3*PI)];
+    
+    WO_SINGLE obj3( new GO_CUBOID( 1.0 , 1.0 , 1.0 , GO_CUBOID::BOTTOM | GO_CUBOID::BACK ) );
+    obj3[ Colors::White ];
+    
+    vector< PosXYZ > Vp;
+    Vp.push_back( PosXYZ(0.3, 0, 0.1) );
+    Vp.push_back( PosXYZ(0.3, 0.1, 0.1) );
+    Vp.push_back( PosXYZ(0.4, 0.1, 0.1) );
+    Vp.push_back( PosXYZ(0.5, 0.15, 0.1) );
+    
     glClearStencil(0);
    glEnable(GL_STENCIL_TEST);
    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE );
@@ -81,6 +100,9 @@ void drawSetting()
    glStencilFunc( GL_ALWAYS , 5, -1);
     glEnable( GL_LIGHTING );
     Draw::Generic( obj1 );
+    Draw::Generic( obj2 );
+    Draw::Generic( obj3 );
+    Draw::TriangleStrip( Vp );
     glDisable( GL_STENCIL_TEST );
     
     glColor4f( 1.0, 1.0, 1.0, 1.0 );
@@ -107,7 +129,6 @@ void drawObjects()
    glBegin(GL_LINES);
    for (int i = 0; i <= 30; i += 1)
        glEvalCoord1f( (GLfloat) i/30.0);
-       //  glEvalCoord2f((GLfloat) i/30.0, (GLfloat) i/20.0);
    glEnd();
    
    glClearStencil(0);
@@ -212,25 +233,29 @@ void draw()
 	
 	glDisable( GL_DEPTH_TEST );
 	
-	glMatrixMode(GL_PROJECTION);
-	// glPushMatrix();
+	glMatrixMode(GL_PROJECTION);	
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 	
-	glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	/*
-	glOrtho(0, WindowSize.X, WindowSize.Y, 0, -1, 1);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	*/
 	glColor3f(0.0f, 255.0f, 1.0f);
-	
-	glBegin( GL_LINES );
+	/*
+	string imageFile = "Qtiles.bmp";
+    Texture TXR( imageFile.c_str() );
+    // TXR.drawSample();
+    TXR.enable();
+    
+	glBegin( GL_TRIANGLE_STRIP );
+	    glTexCoord2f( 0.0, 0.0 );
 	    glVertex2f(0.0, 0.0);
-	    glVertex2f(1.0, 1.0);
+	    glTexCoord2f(1.0, 0.0); 
+	    glVertex2f(1.0, 0.0);
+	    glTexCoord2f(1.0, 1.0);
+	    glVertex2f(1.0, 1.0); 
+	    glTexCoord2f(0.0, 1.0);
+	    glVertex2f(0.0, 1.0);
 	glEnd();
-	
+    TXR.disable();*/
     glutSwapBuffers();
     
     i++;
@@ -285,6 +310,38 @@ void handleKeyPress( unsigned char key, int x, int y )
 	    break;
 	case 'y':
 	    keysPressed |= KEYS::Y;
+	    break;
+	    
+	case 'i':
+	    tileF.X += 0.01;
+	    break;
+	case 'k':
+	    tileF.X -= 0.01;
+	    break;
+	case 'l':
+	    tileF.Y += 0.01;
+	    break;
+	case 'j':
+	    tileF.Y -= 0.01;
+	    break;
+	    
+	case 'b':
+	    cylSplits += 1;
+	    break;
+	case 'n':
+	    cylSplits -= 1;
+	    break;
+	case ',':
+	    cylFront = !cylFront;
+	    DEBUG("got",0);
+	    break;
+	case '.':
+	    cylSides = !cylSides;
+	    DEBUG("got",1);
+	    break;
+	case '/':
+	    cylBack = !cylBack;
+	    DEBUG("got",2);
 	    break;
     }
 }

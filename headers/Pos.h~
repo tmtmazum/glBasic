@@ -20,13 +20,6 @@ class PosRPT;
 
 float root_sum_of_squares( float t1, float t2, float t3=0 );
 
-std::string inline toString(const float& f)
-{
-    std::ostringstream ss;
-    ss << f;
-    return ss.str();
-}
-
 typedef float PosX;
 typedef float PosY;
 typedef float PosZ;
@@ -151,6 +144,14 @@ class PosXYZ : public Pos
 		    array[1] = Y;
 		    array[2] = Z;
 		    return array;
+		}
+		
+		float* load(float* f)
+		{
+		    f[0] = X;
+		    f[1] = Y;
+		    f[2] = Z;
+		    return f;
 		}
 		
 		~PosXYZ() { /* if(array) delete array;*/ }

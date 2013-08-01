@@ -77,6 +77,17 @@ struct MouseAB
     {
 	return savedPos;
     }
+    
+    static PosXY getDiffEither( PosXY Current , PosXY Old , PosXY WindowSize )
+    {
+	
+	PosXY MouseDiff( -(Old.X - Current.X), -(Old.Y -Current.Y) );
+	
+	if(abs(MouseDiff.X) > abs(MouseDiff.Y)) MouseDiff = PosXY( MouseDiff.X, 0 );
+	else MouseDiff = PosXY( 0, MouseDiff.Y );
+	
+	return PosXY( MouseDiff.X/WindowSize.X, MouseDiff.Y/WindowSize.Y );
+    }
 };
 
 #endif

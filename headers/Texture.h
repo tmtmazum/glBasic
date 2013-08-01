@@ -9,33 +9,34 @@
 
 #include <GL/glut.h>
 
-struct Texture
+struct TextureIF
+// 2D Texture struct with an ID and tilingFactor
 {
     // std::vector< char >	 ImagePixels;
     // PosXY ImageSize;
     
     // GL Variables:
     // GLuint texBufferID;
-    GLuint textureId;
-    float tilingFactor;
+    GLuint ID;
+    PosXY tilingFactor;
     
-    Texture()
+    TextureIF()
     {
-	textureId = -1;
-	tilingFactor = 1.0;
+	ID = -1;
+	tilingFactor = PosXY(1.0,1.0);
     }
     
-    Texture( const char* filepath )
+    TextureIF( const char* filepath, PosXY tile=PosXY(1.0,1.0) )
     {
 	ImagePWH* myImage = ImagePWH::loadBMP( filepath );
-	textureId = this->load( myImage );
+	this->ID= this->load( myImage );
 	delete myImage;
 	
-	tilingFactor = 1.0;
+	tilingFactor = tile;
     }
-    Texture( const Texture& T1 )
+    TextureIF( const TextureIF& T1 )
     {
-	this->textureId = T1.textureId;
+	this->ID = T1.ID;
 	this->tilingFactor = T1.tilingFactor;
     }
     
@@ -55,7 +56,7 @@ struct Texture
     void drawSample() const
     {
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, textureId);
+	glBindTexture(GL_TEXTURE_2D, ID);
 	
 	//Use blurry texture mapping (replace GL_LINEAR with GL_NEAREST for blocky)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -78,7 +79,7 @@ struct Texture
     void enable() const
     {
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, textureId);
+	glBindTexture(GL_TEXTURE_2D, this->ID);
 	this->setFiltersToLinear();
     }
     void disable() const
@@ -86,9 +87,9 @@ struct Texture
 	glDisable(GL_TEXTURE_2D);
     }
     
-    ~Texture()
+    ~TextureIF()
     {
-	glDeleteTextures( 1, &textureId );
+	glDeleteTextures( 1, &ID );
     }
     
 protected:
@@ -98,26 +99,16 @@ protected:
 	glGenTextures(1, &textureId);
 	glBindTexture(GL_TEXTURE_2D, textureId);
 	glTexImage2D(GL_TEXTURE_2D,
-		    0,
-		    GL_RGB,
-		    image->width, image->height,
-		    0,
-		    GL_RGB,
-		    GL_UNSIGNED_BYTE,
-		    image->pixels);
+			0,
+			GL_RGB,
+			image->width, image->height,
+			0,
+			GL_RGB,
+			GL_UNSIGNED_BYTE,
+			image->pixels);
 	return textureId;
     }
     
 };
-/*
-struct TextureFace : public Texture
-{
-    TextureFace( const char* filepath )
-    {
-	ImagePWH* myImage = ImagePWH::loadBMP( filepath );
-	textureId = this->load( myImage );
-	delete myImage;
-    }
-};*/
 
 #endif

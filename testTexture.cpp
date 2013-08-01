@@ -65,11 +65,11 @@ void drawObjects()
     
     string imageFile1 = "ocean_1.BMP";
     string imageFile2 = "Qtiles.bmp";
-    Texture TXR( selectedTexture ? imageFile1.c_str() : imageFile2.c_str() );
+    TextureIF TXR( selectedTexture ? imageFile1.c_str() : imageFile2.c_str() );
     // TXR.drawSample();
     
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, TXR.textureId);
+    glBindTexture(GL_TEXTURE_2D, TXR.ID);
     
     //Use blurry texture mapping (replace GL_LINEAR with GL_NEAREST for blocky)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

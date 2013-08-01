@@ -58,6 +58,39 @@ class GO_CUBOID : public GEOMETRY_OBJECT
   int getType() { return 2; }
 };
 
+struct GO_CYLINDER : public GEOMETRY_OBJECT
+{
+    float radius, height;
+    int splits, enabledFaces;
+    
+    enum FACE
+    {
+	SIDES = 1,
+	FRONT = 2,
+	BACK = 4
+    };
+    
+    GO_CYLINDER( float f1 , float f2 , int i3, int enable = -1 ): radius(f1), height(f2), splits(i3), enabledFaces(enable) {}
+};
+
+struct GO_BEZIER_CURVE : public GEOMETRY_OBJECT
+{
+    std::vector< PosXYZ > ctrlPts;
+    
+    GO_BEZIER_CURVE( PosXYZ start, PosXYZ end )
+    {
+	ctrlPts.push_back( start );
+	ctrlPts.push_back( end );
+    }
+    
+    void operator[] (PosXYZ pt)
+    {
+	std::vector< PosXYZ >::reverse_iterator it = ctrlPts.rbegin();
+	it++;
+	// ctrlPts.insert( it , pt );
+    }
+};
+
 class WORLD_OBJECT : public PosXYZ
 {
     
@@ -66,7 +99,7 @@ class WORLD_OBJECT : public PosXYZ
 class WO_SINGLE : public WORLD_OBJECT
 {public:
     GEOMETRY_OBJECT* GOx;
-    Material M; ColorRGBA C; Texture T;
+    Material M; ColorRGBA C; TextureIF* T;
     PosRPT transform;	// Rotation + Scale
     
     int enabledOptions;
@@ -86,6 +119,7 @@ private:
 	C = ColorRGBA(0.5, 0.5, 0.5, 0.5);
 	transform = PosRPT( 1.0, 0.0, 0.0 );
 	enabledOptions = -1;
+	T = 0;
     }
 public:
     
@@ -96,7 +130,7 @@ public:
 	GOx( WS1.GOx ) , M( WS1.M ) , C( WS1.C ),
 	transform( WS1.transform ), enabledOptions( WS1.enabledOptions ) { defaultSettings(); }
 	
-    ~WO_SINGLE() { delete GOx; }
+    ~WO_SINGLE() { delete GOx; if(T) delete T;}
 	
     WO_SINGLE& operator[]( const Material& M1 )
     {
@@ -130,9 +164,9 @@ public:
 	return *this;
     }
     
-    WO_SINGLE& operator[]( const std::string& s )
+    WO_SINGLE& operator[]( TextureIF* Tx )
     {
-	T = Texture( s.c_str() );
+	T = Tx;
     }
 };
 

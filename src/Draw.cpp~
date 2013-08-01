@@ -3,6 +3,7 @@
 #include "../headers/DEBUG.h"
 
 #include <cassert>
+#include <cstring>
 #include <GL/glut.h>
 
 // template< typename ty >
@@ -260,9 +261,6 @@ void Draw::Generic( const WO_SINGLE& WS1 )
 	R1.phi += WS1.transform.phi;
 	R1.theta += WS1.transform.theta;
 	P1 = PosXYZ( R1 );
-	/*WS1.X = P1.X;
-	WS1.Y = P1.Y;
-	WS1.Z = P1.Z;*/
     }
     
     if( toggleTranslate ) glTranslatef( P1.X , P1.Y , P1.Z );
@@ -274,24 +272,24 @@ void Draw::Generic( const WO_SINGLE& WS1 )
     glRotatef( transTheta , 0.0 , 1.0 , 0.0 );
     
     //glRotatef( (angleDEG) angleRAD( WS1.transform.phi ), 0.0, 0.0, 1.0f );
-    
-    bool hasTexture = WS1.T.textureId != -1;
-    
-    if( hasTexture )
-    {
-	WS1.T.enable(); DEBUG("Draw", 1 );
-    }
+    bool hasTexture = WS1.T;
     
     ColorRGBA C2 = WS1.C;
     C2.get();
     
+    if( hasTexture )
+    {
+	WS1.T->enable();
+    }
+    
     GO_CUBOID* GCx = dynamic_cast<GO_CUBOID*>( WS1.GOx );
-    if(GCx != 0) Draw::Generic( *GCx , hasTexture , WS1.T.tilingFactor );
-    WS1.T.drawSample();
+    GO_CYLINDER* GCy = dynamic_cast<GO_CYLINDER*>( WS1.GOx );
+    if(GCx != 0) Draw::Generic( *GCx , hasTexture , hasTexture ? WS1.T->tilingFactor : PosXY(0,0) );
+    else if(GCy != 0) Draw::Generic( *GCy );
     
     if( hasTexture )
     {
-	WS1.T.disable();
+	WS1.T->disable();
     }
     
     glRotatef( -transTheta , 0.0 , 1.0 , 0.0 );
@@ -327,10 +325,20 @@ void Draw::Outline( PosXYZ* DrawPosV )
     
 }
 
-void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
+void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, PosXY tilingFactor)
 {
-    int draw_type = GL_POLYGON;
+    int draw_type = GL_QUADS;
     
+    float t[4][2] = 
+    {
+	{ 0.0, 0.0 },
+	{ 0.0, 1.0 },
+	{ 1.0, 1.0 },
+	{ 1.0, 0.0 }
+    };
+    
+    // glEnableClientState( GL_VERTEX_ARRAY );
+    // glEnableClientState( GL_TEXTURE_2D_ARRAY );
     PosXYZ DrawPosV[4];
     if( GC1.enabledFaces & GO_CUBOID::BOTTOM )
     {
@@ -338,19 +346,41 @@ void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
 	DrawPosV[1] = PosXYZ( + GC1.length, - GC1.width, - GC1.height);
 	DrawPosV[2] = PosXYZ( - GC1.length, - GC1.width, - GC1.height);
 	DrawPosV[3] = PosXYZ( - GC1.length, + GC1.width, - GC1.height);
+	/*
+	float v[4][3] = 
+	{
+	    { + GC1.length, + GC1.width, - GC1.height},
+	    { + GC1.length, - GC1.width, - GC1.height},
+	    { - GC1.length, - GC1.width, - GC1.height},
+	    { - GC1.length, + GC1.width, - GC1.height}
+	};
 	
-	glBegin( draw_type );
-	    for(int i = 0; i < 4; ++i) 
-	    {
-		DrawPosV[i].getVertex();
-		if(hasTexture)
+	glVertexPointer(3, GL_FLOAT, 0, v);
+	glTexCoordPointer(2, GL_FLOAT, 0, t);
+	glDrawArrays( draw_type , 0 , 4 );
+	*/
+	if(hasTexture)
+	{
+	    glBegin( draw_type );
+		for(int i = 0; i < 4; ++i) 
 		{
-		    float x = tilingFactor*bool(i > 1);
-		    float y = tilingFactor*bool(i==1 || i==2);
-		    glTexCoord2f( x, y );
+		    glTexCoord2f( tilingFactor.X*bool(i > 1), 
+				tilingFactor.Y*bool(i==1 || i==2) );
+		    DrawPosV[i].getVertex();
 		}
-	    }
-	glEnd();
+	    glEnd();
+	}
+	else
+	{
+	    glBegin( draw_type );
+		for(int i = 0; i < 4; ++i) 
+		{
+		    glTexCoord2f( tilingFactor.X*bool(i > 1), 
+				tilingFactor.Y*bool(i==1 || i==2) );
+		    DrawPosV[i].getVertex();
+		}
+	    glEnd();
+	}
 	
 	if(GC1.SHOW_BLUEPRINT)
 	{
@@ -371,7 +401,7 @@ void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
 		DrawPosV[i].getVertex();
 		if(hasTexture)
 		{
-		    glTexCoord2f( (i & 1)*tilingFactor, (i & 2)*tilingFactor );
+		    glTexCoord2f( (i & 1)*tilingFactor.X, (i & 2)*tilingFactor.Y );
 		}
 	    }
 	/*
@@ -399,7 +429,7 @@ void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
 		DrawPosV[i].getVertex();
 		if(hasTexture)
 		{
-		    glTexCoord2f( (i & 1)*tilingFactor, (i & 2)*tilingFactor );
+		    glTexCoord2f( (i & 1)*tilingFactor.X, (i & 2)*tilingFactor.Y );
 		}
 	    }
 	glEnd();/*
@@ -428,7 +458,7 @@ void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
 		DrawPosV[i].getVertex();
 		if(hasTexture)
 		{
-		    glTexCoord2f( (i & 1)*tilingFactor, (i & 2)*tilingFactor );
+		    glTexCoord2f( (i & 1)*tilingFactor.X, (i & 2)*tilingFactor.Y );
 		}
 	    }
 	glEnd();/*
@@ -457,7 +487,7 @@ void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
 		DrawPosV[i].getVertex();
 		if(hasTexture)
 		{
-		    glTexCoord2f( (i & 1)*tilingFactor, (i & 2)*tilingFactor );
+		    glTexCoord2f( (i & 1)*tilingFactor.X, (i & 2)*tilingFactor.Y );
 		}
 	    }
 	glEnd();
@@ -486,7 +516,7 @@ void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
 		DrawPosV[i].getVertex();
 		if(hasTexture)
 		{
-		    glTexCoord2f( (i & 1)*tilingFactor, (i & 2)*tilingFactor );
+		    glTexCoord2f( (i & 1)*tilingFactor.X, (i & 2)*tilingFactor.Y );
 		}
 	    }
 	glEnd();
@@ -503,6 +533,8 @@ void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
 	    Outline( DrawPosV );
 	}
     }
+    // glDisableClientState( GL_TEXTURE_2D_ARRAY );
+    // glDisableClientState( GL_VERTEX_ARRAY );
     
     if(GC1.SHOW_BLUEPRINT)
     {
@@ -521,8 +553,9 @@ void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
 	    SketchPosV[4] = PosXYZ( 0  , 0 , DrawPosV[3].Z );
 	    SketchPosV[5] = PosXYZ( 0 , 0 , 0 );
 	    
+	    Colors::White.get();
+	    
 	    glTranslatef( 0 , 0.0, 0.02 );
-	    Colors::Red.get();
 	    
 	    glBegin( GL_LINES );
 		SketchPosV[0].getVertex();
@@ -537,7 +570,6 @@ void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
 	    glTranslatef( 0, 0.0, -0.02 );
 	    
 	    glTranslatef( -0.02 , 0, 0.0 );
-	    Colors::Green.get();
 	    glBegin( GL_LINES );
 		SketchPosV[2].getVertex();
 		SketchPosV[3].getVertex();
@@ -549,7 +581,6 @@ void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
 	    glEnd();
 	    
 	    glTranslatef( 0.02, 0, 0.0 );
-	    Colors::Blue.get();
 	    // glTranslatef( 0.0 , 0.0, 0.0 );
 	    
 	    glBegin( GL_LINES );
@@ -608,6 +639,63 @@ void Draw::Generic( const GO_CUBOID& GC1, bool hasTexture, float tilingFactor)
     }
 }
 
+void Draw::Generic( const GO_CYLINDER& GC )
+{
+    PosRP st( GC.radius , 0.0 );
+    float V[ 2*(GC.splits + 1) ][ 3];
+    for(int i = 0; i < 2*GC.splits; ++i)
+    {
+	PosXY p( st );
+	PosXYZ p1( p ); p1.Z = (i % 2 == 0 ? GC.height : -GC.height);
+	
+	V[i][0] = p1.X;
+	V[i][1] = p1.Y;
+	V[i][2] = p1.Z;
+	
+	if(i == 0 || i==1)
+	{
+	    V[2*GC.splits+i][0] = p1.X;
+	    V[2*GC.splits+i][1] = p1.Y;
+	    V[2*GC.splits+i][2] = p1.Z;
+	}
+	
+	if(i % 2 == 1 ) st.angle = st.angle.value + 2*PI/GC.splits;
+    }
+    
+    
+    if( GC.enabledFaces & GO_CYLINDER::SIDES )
+    {
+	int drawType1 = GL_QUAD_STRIP;
+	glEnableClientState( GL_VERTEX_ARRAY );
+	glVertexPointer(3, GL_FLOAT, 0, V);
+	glDrawArrays( drawType1 , 0 , 2*(GC.splits + 1) );
+	glDisableClientState( GL_VERTEX_ARRAY );
+    }
+    if( GC.enabledFaces & GO_CYLINDER::FRONT )
+    {
+	int drawType = GL_TRIANGLE_FAN;
+	glBegin( drawType );
+	    glVertex3f( 0, 0, GC.height );
+	    for(int i = 0; i < GC.splits+1; ++i)
+		glVertex3fv( V[2*i] );
+	glEnd();
+    }
+    if( GC.enabledFaces & GO_CYLINDER::BACK )
+    {
+	int drawType = GL_TRIANGLE_FAN;
+	glBegin( drawType );
+	    glVertex3f( 0, 0, -GC.height );
+	    for(int i = 0; i < GC.splits+1; ++i)
+		glVertex3fv( V[2*i+1] );
+	glEnd();
+    }
+}
+
+void Draw::Generic( const GO_BEZIER_CURVE& BC )
+{
+
+}
+
 void Draw::Star( const PosXYZ& P1 )
 {
     glTranslatef( P1.X , P1.Y , P1.Z );
@@ -629,4 +717,22 @@ void Draw::Star( const PosXYZ& P1 )
 	glVertex3f( r , 0 , -r );
     glEnd();
     glTranslatef( -P1.X , -P1.Y , -P1.Z );
+}
+
+void Draw::TriangleStrip( const std::vector< PosXYZ >& V )
+{
+    int n = V.size();
+    float pts[ n ] [ 3 ];
+    
+    for(int i = 0; i < n; ++i)
+    {
+	pts[i][0] = V.at(i).X;
+	pts[i][1] = V.at(i).Y;
+	pts[i][2] = V.at(i).Z;
+    }
+    
+    glEnableClientState( GL_VERTEX_ARRAY );
+    glVertexPointer(3, GL_FLOAT, 0, pts);
+    glDrawArrays( GL_TRIANGLE_STRIP , 0 , n );
+    glDisableClientState( GL_VERTEX_ARRAY );
 }

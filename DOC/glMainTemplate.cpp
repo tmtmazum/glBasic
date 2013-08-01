@@ -35,7 +35,7 @@ int main(int argc, char** argv)
    * 		x:int, 
    * 		y:int): lambda<void> */
   
-  glutSpecialFunc(handleSpecialpress);
+  glutSpecialFunc(handleSpecialPress);
   /* where handleSpecialPress(
    *		key: int, 
    * 		x:int, 

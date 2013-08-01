@@ -146,6 +146,14 @@ class PosXYZ : public Pos
 		    return array;
 		}
 		
+		float* load(float* f)
+		{
+		    f[0] = X;
+		    f[1] = Y;
+		    f[2] = Z;
+		    return f;
+		}
+		
 		~PosXYZ() { /* if(array) delete array;*/ }
 		void getVertex();
 		void getVertex(float nX, float nY, float nZ);
